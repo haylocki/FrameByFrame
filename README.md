@@ -100,6 +100,12 @@ Open a Command Prompt
 
 `python path/to/FrameByFrame/src/FrameByFrame.py`
 
+# Models
+the requied models are available in one location here:
+[Models](https://www.mediafire.com/folder/zpamguignx19v/models)
+
+Save them to the src/models folder
+
 # Usage:
 Click on *File->Image Directory*
 
