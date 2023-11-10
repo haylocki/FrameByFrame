@@ -1,0 +1,9 @@
+pip
+wheel
+numpy
+typing-extensions
+ssim
+psutil
+opencv-contrib-python==4.8.0.76
+basicsr
+pyqt5==5.14.2
