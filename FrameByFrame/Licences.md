@@ -1,5 +1,5 @@
 # FrameByFrame
-This code is released under the GNU 2.0 License
+This code is released under the GNU General Public License v2.0
 
 # Scaling model Licences
 
