@@ -91,14 +91,16 @@ class Image_Processing_Worker(QRunnable):
         enable_enhancement = self.gui_values.enable_enhancement
 
         for image_counter in range(self.start_image_index, self.end_image_index):
-            # Percentage for frame enhancing is 0%-50%
-            progress_percentage = (
-                self.count_files(self.enhanced_dir) * 50
-            ) // self.total_images
-            self.progress_callback.emit(progress_percentage)
-            prev_file_path = f"{self.enhanced_dir}{image_counter - 1:06d}.png"
             try:
                 if not os.path.isfile(f"{self.enhanced_dir}{image_counter:06d}.png"):
+                    prev_file_path = f"{self.enhanced_dir}{image_counter - 1:06d}.png"
+
+                    # Percentage for frame enhancing is 0%-50%
+                    progress_percentage = (
+                        self.count_files(self.enhanced_dir) * 50
+                    ) // self.total_images
+                    self.progress_callback.emit(progress_percentage)
+
                     self.image.load(image_counter, self.image_dir)
 
                     if self.ssim.get(image_counter - 1) == IDENTICAL and os.path.exists(
