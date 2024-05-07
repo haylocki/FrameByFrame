@@ -95,6 +95,6 @@ class Image:
         height, width, channel = cv2Image.shape
         bytes_per_line = channel * width
         qImage = QImage(
-            cv2Image.data, width, height, bytes_per_line, QImage.Format_BGR888
+            cv2Image.data, width, height, bytes_per_line, QImage.Format.Format_BGR888
         )
         return qImage
