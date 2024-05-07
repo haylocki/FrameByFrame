@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from Gui_Values import Gui_Values
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QImage, QPixmap
 
 MINIMUM_IMAGE_SIZE = 14
 
