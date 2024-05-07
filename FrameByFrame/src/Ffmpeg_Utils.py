@@ -1,7 +1,6 @@
 import re
-from PyQt5.QtCore import QProcess, QObject, pyqtSlot, pyqtSignal
+from PyQt6.QtCore import QProcess, QObject, pyqtSlot, pyqtSignal
 from Gui_Values import Gui_Values
-
 
 class Ffmpeg_Utils(QObject):
     finished_signal = pyqtSignal()
@@ -57,8 +56,7 @@ class Ffmpeg_Utils(QObject):
         except OSError as e:
             print(f"Error starting ffmpeg process: {e}")
 
-    pyqtSlot()
-
+    @pyqtSlot()
     def read_ffmpeg_output(self):
         if self.subprocess_proc is None:
             return

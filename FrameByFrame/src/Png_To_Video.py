@@ -6,8 +6,8 @@ from Dialogs import Dialogs
 from Ffmpeg_Utils import Ffmpeg_Utils
 from Gui_Values import Gui_Values
 from Ssim import Ssim
-from PyQt5.QtCore import pyqtSignal, QObject
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6.QtCore import pyqtSignal, QObject
+from PyQt6.QtWidgets import QMainWindow
 
 
 class Png_To_Video(QObject):

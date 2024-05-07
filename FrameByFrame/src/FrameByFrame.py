@@ -2,9 +2,11 @@ import fnmatch
 import os
 import sys
 from multiprocessing import cpu_count
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import QCoreApplication, QProcess, QEvent, pyqtSlot
-from PyQt5.QtWidgets import QApplication, qApp, QDesktopWidget, QSpinBox
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import QCoreApplication, QProcess, QEvent, pyqtSlot
+from PyQt6.QtWidgets import QApplication, QSpinBox
+from PyQt6.QtGui import QGuiApplication
+from PyQt6 import uic
 from Copy_Images import Copy_Images
 from Dialogs import Dialogs
 from Gui_Values import Gui_Values
@@ -18,7 +20,6 @@ from Video_To_Png import Video_To_Png
 IDENTICAL = 1.0
 GUI_CONTROLS_HEIGHT = 200
 MINIMUM_IMAGE_SIZE = 14
-
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
@@ -56,9 +57,9 @@ class Ui(QtWidgets.QMainWindow):
         self.enable_enhancement = False
         self.subprocess_proc = None
         self.window_border = 10
-        self.desktop = QApplication.desktop()
-        self.screen_width = self.desktop.screenGeometry().width() - self.window_border
-        self.screen_height = self.desktop.screenGeometry().height() - self.window_border
+        self.desktop = QGuiApplication.primaryScreen().geometry()
+        self.screen_width = self.desktop.width() - self.window_border
+        self.screen_height = self.desktop.height() - self.window_border
         self.threads_spinbox.setMaximum(cpu_count())
         self.enable_buttons_list = [
             self.enhancement_checkbox,
@@ -322,7 +323,7 @@ class Ui(QtWidgets.QMainWindow):
             self.editing_image.picture,
             self.previous_image.picture,
             self.next_image.picture,
-            QDesktopWidget().screenGeometry().size(),
+            QGuiApplication.primaryScreen().size(),
         ):
             file_path_to_copy_from = f"{self.image_dir}{self.image_counter:06d}.png"
             self.copy_images.backup_image(file_path_to_copy_from, self.backup_dir)
@@ -544,17 +545,20 @@ class Ui(QtWidgets.QMainWindow):
 
     def quit_application(self):
         self.closing_down()
-        qApp.quit()
+        QApplication.instance().quit()
 
     def event(self, event):
-        if event.type() == QEvent.Close:
+        if event.type() == QEvent.Type.Close:
             self.closing_down()
             event.accept()
 
         return super().event(event)
 
+def main():
+    app = QtWidgets.QApplication(sys.argv)  # Create QApplication instance
+    ui = Ui()
+    sys.exit(app.exec())
 
-# Create an instance of QtWidgets.QApplication
-app = QtWidgets.QApplication(sys.argv)
-window = Ui()  # Create an instance of our class
-app.exec_()  # Start the application
+if __name__ == "__main__":
+    main()
+

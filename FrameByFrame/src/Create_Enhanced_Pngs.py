@@ -1,13 +1,12 @@
 import numpy as np
 import psutil
 import time
-from PyQt5.QtCore import QObject, QThreadPool, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6.QtCore import QObject, QThreadPool, pyqtSignal
+from PyQt6.QtWidgets import QMainWindow
 from Enhanced_File_Operations import Enhanced_File_Operations
 from Gui_Values import Gui_Values
 from Image_Processing import Image_Processing_Worker
 from Ssim import Ssim
-
 
 class Enhanced_Png_Creator(QObject):
     processing_finished = pyqtSignal()

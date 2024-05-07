@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5.QtCore import QSize
+from PyQt6.QtCore import QSize
 from typing import Tuple
 
 SIZE_OF_WINDOW_DECORATIONS = 100

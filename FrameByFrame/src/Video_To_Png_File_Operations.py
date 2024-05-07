@@ -3,7 +3,7 @@ import numpy as np
 import os
 import shutil
 from Dialogs import Dialogs
-from PyQt5.QtWidgets import QMainWindow
+from PyQt6.QtWidgets import QMainWindow
 
 
 class Video_To_Png_File_Operations:

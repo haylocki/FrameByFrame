@@ -1,7 +1,7 @@
 import cv2
 from Editor_Mouse_Callback import Editor_Mouse_Callback
 import numpy as np
-from PyQt5.QtCore import QSize
+from PyQt6.QtCore import QSize
 from Scale_Image import Scale_Image
 
 EQUALS = 61
