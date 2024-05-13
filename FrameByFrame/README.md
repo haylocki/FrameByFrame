@@ -7,6 +7,7 @@ Allows you to edit a video to remove dust and scratches. The video can then be r
 **Install Python 3.11.9:**
 
 We require python < 3.12 because of a compatiblity problem with lmdb
+
 Download [Python 3.11.9](https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe)
 
 Open the downloaded file to install python
