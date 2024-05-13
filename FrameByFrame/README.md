@@ -3,13 +3,13 @@
 Allows you to edit a video to remove dust and scratches. The video can then be re-encoded using various AI scaling models.
 
 ## Windows Installation
-Due to compatbility problems between opencv-contrib-python and pyqt5 we have to install specific versions of those packages. We require python 3.8 to enable installation of the PyQt5-5.14.2 wheel file.
 
-**Install Python 3.8:**
+**Install Python 3.11.9:**
 
-Download [Python 3.8](https://www.python.org/ftp/python/3.8.8/python-3.8.8rc1-amd64.exe)
+We require python < 3.12 because of a compatiblity problem with lmdb
+Download [Python 3.11.9](https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe)
 
-Open downloaded file
+Open the downloaded file to install python
 
 Select the "Use admin privileges when installing py.exe" option
 
@@ -43,12 +43,7 @@ Search for "Command Prompt" in the Start Menu, right-click it, and select "Run a
 
 `path\to\FrameByFrame\fbfenv\Scripts\Activate.bat`
 
-Download [PyQt5-5.14.2](https://files.pythonhosted.org/packages/d7/8e/5fa1dd8095728fa754e96633d4c97e0283fb0be5ab3a0a25f7df054deff1/PyQt5-5.14.2-5.14.2-cp35.cp36.cp37.cp38-none-win_amd64.whl)
-
-`pip install path\to\PyQt5-5.14.2-5.14.2-cp35.cp36.cp37.cp38-none-win_amd64.whl`
-
-
-**Install remaining required python modules:**
+**Install required python modules:**
 
 `pip install --upgrade -r requirements.txt`
 

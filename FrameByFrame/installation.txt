@@ -1,16 +1,16 @@
 Windows install:
 
-# Due to compatbility problems between opencv-contrib-python and pyqt5 we
-# have to install specific versions of those packages
-# We require python 3.8 to enable installation of PyQt5-5.14.2 wheel file
-
 Install Python:
 
-Open "https://www.python.org/downloads/release/python-388rc1/" in a browser
-Download "Windows installer (64-bit)"
-Open downloaded file
+# We require python < 3.12 because of a compatiblity problem with lmdb
+Open "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" in a browser.
+
+Open the downloaded file to install python
+
 Select the "Use admin privileges when installing py.exe" option
+
 Select the "Add python.exe to PATH" option
+
 Click on "Install Now"
 
 # Open Command Prompt as Administrator: 
@@ -20,6 +20,9 @@ Search for "Command Prompt" in the Start Menu, right-click it, and select "Run a
 winget install --id Gyan.FFmpeg
 
 Reboot the computer
+
+# Open Command Prompt as Administrator: 
+Search for "Command Prompt" in the Start Menu, right-click it, and select "Run as administrator."
 
 # Ensure pip is installed:
 python -m ensurepip --upgrade
@@ -32,10 +35,6 @@ python -m venv path\to\FrameByFrame\fbfenv
 
 # Activate the virtual environment:
 path\to\FrameByFrame\fbfenv\Scripts\Activate.bat
-
-Open "https://pypi.org/project/PyQt5/5.14.2/#files" in a browser:
-Download "PyQt5-5.14.2-5.14.2-cp35.cp36.cp37.cp38-none-win_amd64.whl"
-pip install path\to\PyQt5-5.14.2-5.14.2-cp35.cp36.cp37.cp38-none-win_amd64.whl
 
 # Install python modules:
 pip install --upgrade -r requirements.txt
