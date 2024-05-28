@@ -118,7 +118,7 @@ Then select the video you are working on. This will convert the images back into
 
 **Next:** Moves to the next frame in the video
 
-**Edit Image:** allows you to edit the frame being displayed on the left of the FrameByFrame window
+**Edit Image:** Allows you to edit the frame being displayed on the left of the FrameByFrame window
 
 **Mask:** Allows you to mask off parts of an image. Masked areas will not be copied when copying images.
 
@@ -126,7 +126,7 @@ Then select the video you are working on. This will convert the images back into
 
 **Copy:** Copies the frame displayed in the left of the window over then next frame in the video:
 
-**Copy From:** selects the frame displayed in the left of the window.
+**Copy From:** Selects the frame displayed in the left of the window.
 
 **Copy To:** Copies the frame selected with **"Copy From"** over all frames up to and including the frame displayed in the left of the window
 
@@ -146,24 +146,37 @@ Then select the video you are working on. This will convert the images back into
 
 **Threads:** The number of simultaneouly generated frames. If you are using Hardware encoding then this must be set to 1 as Nvidia's CUDA library is not thread safe.
 
-**Crop Top:** allows you to crop the top of the video
+**Crop Top:** Allows you to crop the top of the video
 
-**Crop Left:** allows you to crop the left of the video
+**Crop Left:** Allows you to crop the left of the video
 
-**Crop Right:** allows you to crop the righ of the video
+**Crop Right:** Allows you to crop the righ of the video
 
-**Crop Bottom:** allows you to crop the bottom of the video
+**Crop Bottom:** Allows you to crop the bottom of the video
 
 ### Editor controls
-**Left Mouse Button:** copies pixels from previous frame to frame being edited
+**Left Mouse Button:** Copies pixels from previous frame to frame being edited
 
-**Right Mouse Button:** copies pixels from next frame to frame being edited
+**Right Mouse Button:** Copies pixels from next frame to frame being edited
 
 **Middle Mouse Button:** Blends the pixels at the location of the cursor
 
 **S:** Save the edited frame
 
 **X:** Cancel editing the frame
+
+**Plus (+) or Equals (=):** Increase the affected area when using mouse buttons
+
+**Minus (-):** Decrease the affected area when using mouse buttons
+
+### Mask controls
+**Left Mouse Button:** Sets pixels in the mask
+
+**Right Mouse Button:** Clears pixels in the mask
+
+**S:** Save the mask
+
+**X:** Clears the mask
 
 **Plus (+) or Equals (=):** Increase the affected area when using mouse buttons
 
