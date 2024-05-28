@@ -120,7 +120,7 @@ Then select the video you are working on. This will convert the images back into
 
 **Edit Image:** allows you to edit the frame being displayed on the left of the FrameByFrame window
 
-**Mask: Allows:** you to mask off parts of an image. Masked areas will not be copied when copying images.
+**Mask:** Allows you to mask off parts of an image. Masked areas will not be copied when copying images.
 
 **Undo:** Allows you to undo an edit on a frame
 
