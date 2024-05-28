@@ -5,7 +5,7 @@ from typing import Tuple
 
 MINIMUM_AFFECTED_AREA = 7
 RESET_PREVIOUS_COORDS = -1
-MASK_COLOUR = (0, 0, 255)
+MASK_COLOUR = (255, 255, 255)
 CLEAR_COLOUR = (0, 0, 0)
 
 

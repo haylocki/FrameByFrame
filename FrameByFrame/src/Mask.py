@@ -20,7 +20,7 @@ class Mask:
         self.brush_radius = Brush_Radius()
         self.blended_image = None
         self.picture = None
-        self.brush_size = MINIMUM_BRUSH_SIZE
+        self.brush_size = 20
         self.callback_data = {
             "brush_size": self.brush_size,
         }

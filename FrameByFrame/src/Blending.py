@@ -4,6 +4,8 @@ import numpy as np
 
 class Blending:
 
+    
+    
     def blend_mask(
         self, editing_image: np.ndarray, mask_image: np.ndarray
     ) -> np.ndarray:
@@ -14,6 +16,7 @@ class Blending:
 
     def blend_images(self, image_1, image_2, image_mask) -> np.ndarray:
 
-        blended_image = np.where(image_mask == 0, image_1, image_2)
-
+        blended_image = np.where((image_mask == [0, 0, 0]), image_1, image_2)
+        
         return blended_image
+    
