@@ -112,3 +112,30 @@ Crop Left: allows you to crop the left of the video
 Crop Right: allows you to crop the righ of the video
 Crop Bottom: allows you to crop the bottom of the video
 
+Editor controls
+Left Mouse Button: Copies pixels from previous frame to frame being edited
+
+Right Mouse Button: Copies pixels from next frame to frame being edited
+
+Middle Mouse Button: Blends the pixels at the location of the cursor
+
+S: Save the edited frame
+
+X: Cancel editing the frame
+
+Plus (+) or Equals (=): Increase the affected area when using mouse buttons
+
+Minus (-): Decrease the affected area when using mouse buttons
+
+Mask controls
+Left Mouse Button: Sets pixels in the mask
+
+Right Mouse Button: Clears pixels in the mask
+
+S: Save the mask
+
+X: Clears the mask
+
+Plus (+) or Equals (=): Increase the affected area when using mouse buttons
+
+Minus (-): Decrease the affected area when using mouse buttons
