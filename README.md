@@ -114,11 +114,13 @@ Then select the video you are working on. This will convert the images back into
 
 **Previous:** Moves to the previous frame in the video
 
+**Scan:** This will scan through the video looking for pairs of frames that have a SSIM greater or equal to the current SSIM Threshold value.
+
 **Next:** Moves to the next frame in the video
 
 **Edit Image:** allows you to edit the frame being displayed on the left of the FrameByFrame window
 
-**Scan:** This will scan through the video looking for pairs of frames that have a SSIM greater or equal to the current SSIM Threshold value.
+**Mask: Allows:** you to mask off parts of an image. Masked areas will not be copied when copying images.
 
 **Undo:** Allows you to undo an edit on a frame
 
