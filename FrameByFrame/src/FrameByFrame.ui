@@ -635,6 +635,25 @@
                </widget>
               </item>
               <item>
+               <widget class="QPushButton" name="scan">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Scan</string>
+                </property>
+                <property name="shortcut">
+                 <string>Up</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="next">
                 <property name="enabled">
                  <bool>false</bool>
@@ -698,7 +717,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="scan">
+               <widget class="QPushButton" name="mask_button">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -709,15 +728,15 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>Scan</string>
+                 <string>Mask</string>
                 </property>
                 <property name="shortcut">
-                 <string>Up</string>
+                 <string>M</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="undo_copy">
+               <widget class="QPushButton" name="undo_button">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -1310,8 +1329,7 @@
   <tabstop>previous</tabstop>
   <tabstop>next</tabstop>
   <tabstop>remove_scratch</tabstop>
-  <tabstop>scan</tabstop>
-  <tabstop>undo_copy</tabstop>
+  <tabstop>undo_button</tabstop>
   <tabstop>copy_from</tabstop>
   <tabstop>copy</tabstop>
   <tabstop>copy_to</tabstop>

@@ -1,10 +1,20 @@
-import shutil
 from Copy_Images_File_Operations import Copy_Images_File_Operations
+from Mask import Mask
 from Ssim import Ssim
+
+FORWARD = 1
+BACKWARDS = -1
 
 
 class Copy_Images(Copy_Images_File_Operations):
-    def copy_images(
+    def custom_range(self, start, end):
+        step = 1 if start <= end else -1
+        current = start
+        while (current < end and step > 0) or (current > end and step < 0):
+            yield current
+            current += step
+
+    def copy(
         self,
         image_counter: int,
         image_dir: str,
@@ -12,27 +22,22 @@ class Copy_Images(Copy_Images_File_Operations):
         copy_from_image: int,
         copy_to_image: int,
         ssim: Ssim,
+        mask: Mask,
     ):
+        delta = FORWARD
         if copy_from_image == 0:  # only copying one frame
             copy_from_image = image_counter
             copy_to_image = image_counter + 1
 
         if copy_from_image > copy_to_image:
-            self.copying_backwards(
-                copy_from_image, copy_to_image, image_dir, backup_dir, ssim
-            )
-            copy_from_image, copy_to_image = copy_to_image, copy_from_image
+            delta = BACKWARDS
 
-        for image_counter in range(copy_from_image, copy_to_image):
-            file_path_to_copy_from = f"{image_dir}{image_counter:06d}.png"
-            file_path_to_copy_to = f"{image_dir}{image_counter + 1:06d}.png"
-            self.backup_image(file_path_to_copy_to, backup_dir)
+        for image_counter in self.custom_range(copy_from_image, copy_to_image):
+            self.backup.image(image_counter + delta, image_dir, backup_dir)
             self.copy_image(
-                file_path_to_copy_from, file_path_to_copy_to, ssim, image_counter
+                ssim,
+                image_counter,
+                mask,
+                image_dir,
+                delta,
             )
-
-    def undo(self, image_counter: int, image_dir: str, backup_dir: str):
-        count = 1
-        file_path_to = f"{image_dir}{image_counter:06d}.png"
-        file_path_from = self.find_last_backup(file_path_to, backup_dir)
-        shutil.move(file_path_from, file_path_to)

@@ -11,15 +11,18 @@ from Copy_Images import Copy_Images
 from Dialogs import Dialogs
 from Gui_Values import Gui_Values
 from Image import Image
+from Mask import Mask
 from Png_To_Video import Png_To_Video
 from Scratch_Remover import Scratch_Remover
 from Settings import Settings
 from Ssim import Ssim
 from Video_To_Png import Video_To_Png
+from Undo import Undo
 
 IDENTICAL = 1.0
-GUI_CONTROLS_HEIGHT = 200
+GUI_CONTROLS_HEIGHT = 280
 MINIMUM_IMAGE_SIZE = 14
+
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
@@ -31,11 +34,13 @@ class Ui(QtWidgets.QMainWindow):
         self.png_to_video = Png_To_Video()
         self.copy_images = Copy_Images()
         self.dialogs = Dialogs()
+        self.mask = Mask()
         self.scratch_remover = Scratch_Remover()
         self.gui_values = Gui_Values()
         self.settings = Settings(self.current_dir)
         self.ssim = Ssim()
         self.video_to_png = Video_To_Png()
+        self.undo = Undo()
         self.editing_image = Image(self.left_image_frame, self.left_image_label)
         self.previous_image = Image(self.right_image_frame, self.right_image_label)
         self.next_image = Image(self.right_image_frame, self.right_image_label)
@@ -69,6 +74,7 @@ class Ui(QtWidgets.QMainWindow):
             self.phi_spinbox,
             self.theta_spinbox,
             self.compress_spinbox,
+            self.mask_button,
             self.previous,
             self.image_slider,
             self.remove_scratch,
@@ -90,8 +96,9 @@ class Ui(QtWidgets.QMainWindow):
         self.disable_buttons_list = [
             self.previous,
             self.copy,
-            self.undo_copy,
+            self.undo_button,
             self.next,
+            self.mask_button,
             self.image_slider,
             self.copy_from,
             self.copy_to,
@@ -149,7 +156,8 @@ class Ui(QtWidgets.QMainWindow):
         self.copy.clicked.connect(self.copy_pressed)
         self.copy_from.clicked.connect(self.copy_from_pressed)
         self.copy_to.clicked.connect(self.copy_to_pressed)
-        self.undo_copy.clicked.connect(self.undo_pressed)
+        self.mask_button.clicked.connect(self.mask_pressed)
+        self.undo_button.clicked.connect(self.undo_pressed)
         self.remove_scratch.clicked.connect(self.remove_scratch_pressed)
         self.scan.clicked.connect(self.scan_images)
         self.enhancement_checkbox.stateChanged.connect(
@@ -310,6 +318,10 @@ class Ui(QtWidgets.QMainWindow):
         image.display()
         image.display_image_number(image_number)
 
+    def mask_pressed(self) -> None:
+        self.editing_image.load(self.image_counter, self.image_dir)
+        self.mask.edit(self.editing_image.picture, QGuiApplication.primaryScreen().size())
+
     def remove_scratch_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
         self.next_image.load(self.image_counter + 1, self.image_dir)
@@ -325,8 +337,7 @@ class Ui(QtWidgets.QMainWindow):
             self.next_image.picture,
             QGuiApplication.primaryScreen().size(),
         ):
-            file_path_to_copy_from = f"{self.image_dir}{self.image_counter:06d}.png"
-            self.copy_images.backup_image(file_path_to_copy_from, self.backup_dir)
+            self.copy_images.backup.image(self.image_counter, self.image_dir, self.backup_dir)
             self.editing_image.save(self.image_counter, self.image_dir)
             self.ssim.set(self.image_counter, 0)
 
@@ -337,13 +348,14 @@ class Ui(QtWidgets.QMainWindow):
     def copy_pressed(self) -> None:
         self.copy_from_image = 0
 
-        self.copy_images.copy_images(
+        self.copy_images.copy(
             self.image_counter,
             self.image_dir,
             self.backup_dir,
             self.copy_from_image,
             self.copy_to_image,
             self.ssim,
+            self.mask,
         )
 
         if self.image_counter < self.total_images:
@@ -360,13 +372,14 @@ class Ui(QtWidgets.QMainWindow):
     def copy_to_pressed(self) -> None:
         self.copy_to_image = self.image_counter
         self.disable_buttons()
-        self.copy_images.copy_images(
+        self.copy_images.copy(
             self.image_counter,
             self.image_dir,
             self.backup_dir,
             self.copy_from_image,
             self.copy_to_image,
             self.ssim,
+            self.mask,
         )
         self.image_counter = self.copy_to_image
         self.copy_from_image = 0
@@ -379,8 +392,8 @@ class Ui(QtWidgets.QMainWindow):
         self.enable_buttons()
 
     def undo_pressed(self) -> None:
-        self.copy_images.undo(self.image_counter, self.image_dir, self.backup_dir)
-        self.undo_copy.setEnabled(self.enable_undo())
+        self.undo.copy(self.image_counter, self.image_dir, self.backup_dir)
+        self.undo_button.setEnabled(self.enable_undo())
         self.ssim.set(self.image_counter - 1, 0)
         self.load_images()
 
@@ -399,7 +412,9 @@ class Ui(QtWidgets.QMainWindow):
     def resize_window(self) -> None:
         self.move(0, 0)
         self.adjustSize()
-        self.resize(self.screen_width, self.height() + GUI_CONTROLS_HEIGHT)
+        height, width = self.editing_image.picture.shape[:2]
+        height = int(height * (self.screen_width) / (width * 2))
+        self.resize(self.screen_width, height + GUI_CONTROLS_HEIGHT)
 
     def select_video(self) -> None:
         selected_file = self.dialogs.open_file_dialog("Select Video File")
@@ -418,6 +433,7 @@ class Ui(QtWidgets.QMainWindow):
             self.progress_bar.setValue(0)
             self.image_slider.setValue(1)
             self.load_images()
+            self.create_blank_mask()
             self.resize_window()
             self.enable_buttons()
 
@@ -437,6 +453,7 @@ class Ui(QtWidgets.QMainWindow):
                     self.ssim.clear_values(self.total_images)
 
                 self.load_images()
+                self.create_blank_mask()
                 self.image_slider.setMaximum(self.total_images)
                 self.action_convert_to_video.setEnabled(True)
                 self.enable_buttons()
@@ -465,13 +482,9 @@ class Ui(QtWidgets.QMainWindow):
 
             self.copy_to.setEnabled(self.copy_from_image > 0)
             self.next.setEnabled(self.image_counter < self.total_images)
-            self.copy.setEnabled(
-                bool(
-                    self.image_counter < self.total_images + 1
-                )
-            )
+            self.copy.setEnabled(bool(self.image_counter < self.total_images + 1))
             self.copy_from.setEnabled(self.total_images > 1)
-            self.undo_copy.setEnabled(self.enable_undo())
+            self.undo_button.setEnabled(self.enable_undo())
 
     def load_images(self) -> None:
         if self.total_images > 1 and not self.ignore_spinbox_signals:
@@ -482,6 +495,10 @@ class Ui(QtWidgets.QMainWindow):
             self.enhance_image(self.next_image, self.image_counter + 1)
             self.update_ssim()
             QCoreApplication.processEvents()
+
+    def create_blank_mask(self):
+        height, width = self.editing_image.picture.shape[:2]
+        self.mask.create(height, width)
 
     def stop_scanning(self):
         self.scanning = False
@@ -554,11 +571,12 @@ class Ui(QtWidgets.QMainWindow):
 
         return super().event(event)
 
+
 def main():
     app = QtWidgets.QApplication(sys.argv)  # Create QApplication instance
     ui = Ui()
     sys.exit(app.exec())
 
+
 if __name__ == "__main__":
     main()
-

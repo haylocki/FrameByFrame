@@ -70,7 +70,9 @@ class Image:
         new_height += new_height % 2
         new_width += new_width % 2
 
-        self.picture = self.picture[top : top + new_height - 1, left : left + new_width - 1]
+        self.picture = self.picture[
+            top : top + new_height - 1, left : left + new_width - 1
+        ]
         self.picture = cv2.resize(self.picture, (new_width, new_height))
 
     # The following method is modified from code by samkhan13 here:

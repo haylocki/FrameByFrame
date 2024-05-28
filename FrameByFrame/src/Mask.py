@@ -1,6 +1,7 @@
 import cv2
+from Blending import Blending
 from Brush_Radius import Brush_Radius
-from Editor_Mouse_Callback import Editor_Mouse_Callback
+from Mask_Mouse_Callback import Mask_Mouse_Callback
 import numpy as np
 from PyQt6.QtCore import QSize
 from Scale_Image import Scale_Image
@@ -9,40 +10,45 @@ EQUALS = 61
 MINUS = 45
 PLUS = 43
 RADIUS_DELTA = 2
-MINIMUM_BRUSH_SIZE = 7
+MINIMUM_BRUSH_SIZE = 2
 
 
-class Scratch_Remover:
+class Mask:
     def __init__(self):
         self.si = Scale_Image()
+        self.blend = Blending()
         self.brush_radius = Brush_Radius()
+        self.blended_image = None
+        self.picture = None
         self.brush_size = MINIMUM_BRUSH_SIZE
         self.callback_data = {
             "brush_size": self.brush_size,
         }
 
-    def edit_image(
+    def create(self, height: int, width: int):
+        self.picture = np.zeros((height, width, 3), dtype=np.uint8)
+
+    def edit(
         self,
         editing_image: np.ndarray,
-        previous_image: np.ndarray,
-        next_image: np.ndarray,
         screen_size: QSize,
     ) -> bool:
+        self.blended_image = self.blend.blend_mask(editing_image, self.picture)
         scaled_width, scaled_height, top, left = self.si.scale_image(
             editing_image, screen_size
         )
 
-        cv2.namedWindow("Edit Image", cv2.WINDOW_GUI_NORMAL)
-        cv2.resizeWindow("Edit Image", scaled_width, scaled_height)
-        cv2.moveWindow("Edit Image", left, top)
-        cv2.imshow("Edit Image", editing_image)
+        cv2.namedWindow("Mask Image", cv2.WINDOW_GUI_NORMAL)
+        cv2.resizeWindow("Mask Image", scaled_width, scaled_height)
+        cv2.moveWindow("Mask Image", left, top)
+        cv2.imshow("Mask Image", self.blended_image)
 
-        mouse_callback_handler = Editor_Mouse_Callback()
+        mouse_callback_handler = Mask_Mouse_Callback()
 
         cv2.setMouseCallback(
-            "Edit Image",
+            "Mask Image",
             mouse_callback_handler.mouse_callback_wrapper,
-            (editing_image, previous_image, next_image, self.callback_data),
+            (editing_image, self.picture, self.callback_data),
         )
 
         while True:
@@ -51,12 +57,11 @@ class Scratch_Remover:
             if key != 255:
                 if chr(key).upper() == "S":
                     mouse_callback_handler.reset_coords()
-                    save = True
                     break
 
                 elif chr(key).upper() == "X":
                     mouse_callback_handler.reset_coords()
-                    save = False
+                    self.picture[:] = 0
                     break
 
                 elif key == PLUS or key == EQUALS:
@@ -72,4 +77,3 @@ class Scratch_Remover:
                     self.callback_data["brush_size"] = self.brush_size
 
         cv2.destroyAllWindows()
-        return save
