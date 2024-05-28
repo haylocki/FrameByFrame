@@ -1,16 +1,16 @@
 Windows install:
 
+# Due to compatbility problems between opencv-contrib-python and pyqt5 we
+# have to install specific versions of those packages
+# We require python 3.8 to enable installation of PyQt5-5.14.2 wheel file
+
 Install Python:
 
-# We require python < 3.12 because of a compatiblity problem with lmdb
-Open "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" in a browser.
-
-Open the downloaded file to install python
-
+Open "https://www.python.org/downloads/release/python-388rc1/" in a browser
+Download "Windows installer (64-bit)"
+Open downloaded file
 Select the "Use admin privileges when installing py.exe" option
-
 Select the "Add python.exe to PATH" option
-
 Click on "Install Now"
 
 # Open Command Prompt as Administrator: 
@@ -20,9 +20,6 @@ Search for "Command Prompt" in the Start Menu, right-click it, and select "Run a
 winget install --id Gyan.FFmpeg
 
 Reboot the computer
-
-# Open Command Prompt as Administrator: 
-Search for "Command Prompt" in the Start Menu, right-click it, and select "Run as administrator."
 
 # Ensure pip is installed:
 python -m ensurepip --upgrade
@@ -35,6 +32,10 @@ python -m venv path\to\FrameByFrame\fbfenv
 
 # Activate the virtual environment:
 path\to\FrameByFrame\fbfenv\Scripts\Activate.bat
+
+Open "https://pypi.org/project/PyQt5/5.14.2/#files" in a browser:
+Download "PyQt5-5.14.2-5.14.2-cp35.cp36.cp37.cp38-none-win_amd64.whl"
+pip install path\to\PyQt5-5.14.2-5.14.2-cp35.cp36.cp37.cp38-none-win_amd64.whl
 
 # Install python modules:
 pip install --upgrade -r requirements.txt
@@ -49,7 +50,7 @@ python path\to\FrameByFrame\src\FrameByFrame.py
 Linux Install:
 
 # To install on debian based systems:
-sudo apt install python3.10-venv ffmpeg pip
+sudo apt install python3-venv ffmpeg pip
 
 # To install on Arch Linux based systems:
 sudo pacman -S python-virtualenv ffmpeg
@@ -87,9 +88,10 @@ This will convert the images back into a video using the settings in the applica
 Main controls:
 SSIM Threshold: This is used when scanning the video to find similar images
 Previous: Moves to the previous frame in the video
+Scan: This will scan through the video looking for pairs of frames that have a SSIM greater or equal to the current SSIM Threshold value.
 Next: Moves to the next frame in the video
 Edit Image: allows you to edit the frame being displayed on the left of the FrameByFrame window
-Scan: This will scan through the video looking for pairs of frames that have a SSIM greater or equal to the current SSIM Threshold value.
+Mask: Allows you to mask off parts of an image. Masked areas will not be copied when copying images.
 Undo: Allows you to undo an edit on a frame
 Copy: Copies the frame displayed in the left of the window over then next frame:
 Copy From: selects the frame displayed in the left of the window.
