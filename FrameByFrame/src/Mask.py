@@ -1,6 +1,7 @@
 import cv2
 from Blending import Blending
 from Brush_Radius import Brush_Radius
+from Gui_Values import Gui_Values
 from Mask_Mouse_Callback import Mask_Mouse_Callback
 import numpy as np
 from PyQt6.QtCore import QSize
@@ -25,7 +26,10 @@ class Mask:
             "brush_size": self.brush_size,
         }
 
-    def create(self, height: int, width: int):
+    def create(self, editing_image: np.ndarray, gui_values: Gui_Values):
+        height, width = editing_image.picture.shape[:2]
+        height = height + gui_values.crop_top + gui_values.crop_bottom
+        width = width + gui_values.crop_left + gui_values.crop_right
         self.picture = np.zeros((height, width, 3), dtype=np.uint8)
 
     def edit(

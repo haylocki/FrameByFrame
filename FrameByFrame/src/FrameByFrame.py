@@ -442,7 +442,7 @@ class Ui(QtWidgets.QMainWindow):
             self.progress_bar.setValue(0)
             self.image_slider.setValue(1)
             self.load_images()
-            self.create_blank_mask()
+            self.mask.create(self.editing_image, self.gui_values)
             self.resize_window()
             self.enable_buttons()
 
@@ -466,7 +466,7 @@ class Ui(QtWidgets.QMainWindow):
 
             if self.total_images > 1:
                 self.load_images()
-                self.create_blank_mask()
+                self.mask.create(self.editing_image, self.gui_values)
                 self.image_slider.setMaximum(self.total_images)
                 self.action_convert_to_video.setEnabled(True)
                 self.enable_buttons()
@@ -513,10 +513,6 @@ class Ui(QtWidgets.QMainWindow):
             self.enhance_image(self.next_image, self.image_counter + 1)
             self.update_ssim()
             QCoreApplication.processEvents()
-
-    def create_blank_mask(self):
-        height, width = self.editing_image.picture.shape[:2]
-        self.mask.create(height, width)
 
     def stop_scanning(self):
         self.scanning = False
