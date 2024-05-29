@@ -1,6 +1,7 @@
 import fnmatch
 import os
 import sys
+import numpy as np
 from multiprocessing import cpu_count
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import QCoreApplication, QProcess, QEvent, pyqtSlot
@@ -320,7 +321,9 @@ class Ui(QtWidgets.QMainWindow):
 
     def mask_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
-        self.mask.edit(self.editing_image.picture, QGuiApplication.primaryScreen().size())
+        self.mask.edit(
+            self.editing_image.picture, QGuiApplication.primaryScreen().size()
+        )
 
     def remove_scratch_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
@@ -337,7 +340,9 @@ class Ui(QtWidgets.QMainWindow):
             self.next_image.picture,
             QGuiApplication.primaryScreen().size(),
         ):
-            self.copy_images.backup.image(self.image_counter, self.image_dir, self.backup_dir)
+            self.copy_images.backup.image(
+                self.image_counter, self.image_dir, self.backup_dir
+            )
             self.editing_image.save(self.image_counter, self.image_dir)
             self.ssim.set(self.image_counter, 0)
 
@@ -413,7 +418,11 @@ class Ui(QtWidgets.QMainWindow):
         self.move(0, 0)
         self.adjustSize()
         height, width = self.editing_image.picture.shape[:2]
-        height = int(height * (self.screen_width) / (width * 2))
+        aspect_ratio = width / height
+        width = self.screen_width / 2
+        height = int(width / aspect_ratio)
+        if height > (self.screen_height - GUI_CONTROLS_HEIGHT):
+            height = self.screen_height - GUI_CONTROLS_HEIGHT * 2
         self.resize(self.screen_width, height + GUI_CONTROLS_HEIGHT)
 
     def select_video(self) -> None:
@@ -440,6 +449,9 @@ class Ui(QtWidgets.QMainWindow):
     def select_images_dir(self) -> None:
         selected_dir = self.dialogs.select_directory_dialog()
         if selected_dir:
+            self.image_counter = 1
+            self.image_slider.setValue(self.image_counter)
+            self.disable_buttons()
             self.backup_dir = f"{selected_dir}/backup/"
             self.image_dir = f"{selected_dir}/"
             os.makedirs(self.backup_dir, exist_ok=True)
@@ -448,18 +460,24 @@ class Ui(QtWidgets.QMainWindow):
             self.total_images = (
                 len(fnmatch.filter(os.listdir(self.image_dir), "*.png")) - 1
             )
-            if self.total_images > 1:
-                if not self.ssim.load(self.image_dir, self.total_images):
-                    self.ssim.clear_values(self.total_images)
 
+            if not self.ssim.load(self.image_dir, self.total_images):
+                self.ssim.clear_values(self.total_images)
+
+            if self.total_images > 1:
                 self.load_images()
                 self.create_blank_mask()
                 self.image_slider.setMaximum(self.total_images)
                 self.action_convert_to_video.setEnabled(True)
                 self.enable_buttons()
+            else:
+                self.editing_image.picture = np.zeros((480, 480, 3), dtype=np.uint8)
+                self.next_image.picture = np.zeros((480, 480, 3), dtype=np.uint8)
+                self.enhance_image(self.editing_image, self.image_counter)
+                self.enhance_image(self.next_image, self.image_counter + 1)
+                QCoreApplication.processEvents()
 
             self.action_convert_from_video.setEnabled(True)
-
             self.resize_window()
 
     def disable_buttons(self) -> None:
