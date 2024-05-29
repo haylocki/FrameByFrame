@@ -1,6 +1,6 @@
 # FrameByFrame
 
-Allows you to edit a video to remove dust and scratches. The video can then be re-encoded using various AI scaling models.
+Allows you to edit a video frame by frame to remove blemishes from the video. The video can then be re-encoded using various AI scaling models.
 
 ## Windows Installation
 
@@ -38,11 +38,11 @@ Search for "Command Prompt" in the Start Menu, right-click it, and select "Run a
 
 **Create the virtual environment:**
 
-`python -m venv path\to\FrameByFrame\fbfenv`
+`python -m venv fbfenv`
 
 **Activate the virtual environment:**
 
-`path\to\FrameByFrame\fbfenv\Scripts\Activate.bat`
+`fbfenv\Scripts\Activate.bat`
 
 **Install required python modules:**
 
