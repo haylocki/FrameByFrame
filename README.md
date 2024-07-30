@@ -2,6 +2,8 @@
 
 Allows you to edit a video frame by frame to remove blemishes from the video. The video can then be re-encoded using various AI scaling models.
 
+![Alt text](/Screenshots/Main_Window.png?raw=true)
+
 ## Windows Installation
 
 **Install Python 3.11.9:**
