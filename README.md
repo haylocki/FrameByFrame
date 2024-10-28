@@ -66,7 +66,7 @@ Open a Command Prompt
 
 **To install on debian based systems:**
 
-`sudo apt install python3.10-venv ffmpeg pip`
+`sudo apt install python3-venv ffmpeg pip`
 
 **To install on Arch Linux based systems:**
 
