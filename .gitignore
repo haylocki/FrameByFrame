@@ -1,0 +1,4 @@
+FrameByFrame/.venv/
+FrameByFrame/src/__pycache__/
+FrameByFrame/test/
+FrameByFrame/src/utils/architecture/__pycache__/

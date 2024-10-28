@@ -30,12 +30,6 @@ class Editor_Mouse_Callback:
         self.brush_size = callback_data["brush_size"]
         self.brush_radius = self.brush_size // 2
 
-        if x - self.brush_radius < 0:
-            x = self.brush_radius
-
-        if y - self.brush_radius < 0:
-            y = self.brush_radius
-
         if event == cv2.EVENT_MBUTTONDOWN or flags == cv2.EVENT_FLAG_MBUTTON:
             if self.prevX == RESET_PREVIOUS_COORDS:
                 self.prevX = x

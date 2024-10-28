@@ -29,22 +29,17 @@ class Mask_Mouse_Callback:
 
         self.brush_size = callback_data["brush_size"]
         self.brush_radius = self.brush_size // 2
-
-        if x - self.brush_radius < 0:
-            x = self.brush_radius
-
-        if y - self.brush_radius < 0:
-            y = self.brush_radius
-
-        elif event == cv2.EVENT_RBUTTONDOWN or flags == cv2.EVENT_FLAG_RBUTTON:
+        
+        if event == cv2.EVENT_RBUTTONDOWN or flags == cv2.EVENT_FLAG_RBUTTON:
             mask_image[
-                y - self.brush_radius : y + self.brush_radius,
-                x - self.brush_radius : x + self.brush_radius,
+                max(0, y - self.brush_radius) : max(0, y + self.brush_radius),
+                max(0, x - self.brush_radius) : max(0, x + self.brush_radius),
             ] = CLEAR_COLOUR
 
         elif event == cv2.EVENT_LBUTTONDOWN or flags == cv2.EVENT_FLAG_LBUTTON:
             mask_image[
-                y : y + self.brush_radius, x : x + self.brush_radius
+                max(0, y - self.brush_radius) : max(0, y + self.brush_radius),
+                max(0, x - self.brush_radius) : max(0, x + self.brush_radius),
             ] = MASK_COLOUR
 
         blended_image = self.blend_image.blend_mask(editing_image, mask_image)
