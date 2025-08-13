@@ -525,15 +525,13 @@ class Ui(QtWidgets.QMainWindow):
             self.scanning = True
             self.disable_buttons()
 
-        while (
-            self.scanning
-            and self.image_counter < self.total_images
-            and (
-                self.ssim.get(self.image_counter) < self.ssim_threshold.value()
-                or self.ssim.get(self.image_counter) == IDENTICAL
-            )
-        ):
-            self.load_next_image()
+        while self.scanning and self.image_counter < self.total_images:
+            ssim_value = self.ssim.get(self.image_counter)
+            
+            if ssim_value < self.ssim_threshold.value() or ssim_value == IDENTICAL:
+                self.load_next_image()
+            else:
+                break
 
         self.stop_scanning()
 
