@@ -282,7 +282,7 @@ class Ui(QtWidgets.QMainWindow):
     ) -> None:
         if not self.ignore_spinbox_signals:
             if dimension - spinbox1.value() - spinbox2.value() > MINIMUM_IMAGE_SIZE:
-                self.ssim.set(self.image_counter, 0)
+                self.ssim.set(self.image_counter, None)
             else:
                 self.ignore_spinbox_signals = True
                 spinbox1.setValue(spinbox1.value() - 1)
@@ -293,7 +293,7 @@ class Ui(QtWidgets.QMainWindow):
     def spinbox_changed(self) -> None:
         if not self.ignore_spinbox_signals:
             self.load_images()
-            self.ssim.set(self.image_counter, 0)
+            self.ssim.set(self.image_counter, None)
 
     def update_ssim(self) -> None:
         if not self.slider:
@@ -302,7 +302,6 @@ class Ui(QtWidgets.QMainWindow):
                 self.editing_image.picture,
                 self.next_image.picture,
             )
-            self.ssim.set(self.image_counter, current_ssim)
             self.current_ssim_value.setText(f"{current_ssim:.4f}")
 
         self.slider = False
@@ -344,7 +343,7 @@ class Ui(QtWidgets.QMainWindow):
                 self.image_counter, self.image_dir, self.backup_dir
             )
             self.editing_image.save(self.image_counter, self.image_dir)
-            self.ssim.set(self.image_counter, 0)
+            self.ssim.set(self.image_counter, None)
 
         self.load_images()
         self.update_ssim()
@@ -399,7 +398,7 @@ class Ui(QtWidgets.QMainWindow):
     def undo_pressed(self) -> None:
         self.undo.copy(self.image_counter, self.image_dir, self.backup_dir)
         self.undo_button.setEnabled(self.enable_undo())
-        self.ssim.set(self.image_counter - 1, 0)
+        self.ssim.set(self.image_counter - 1, None)
         self.load_images()
 
     def enable_undo(self) -> bool:
