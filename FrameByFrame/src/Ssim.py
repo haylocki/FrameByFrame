@@ -14,6 +14,7 @@ class Ssim(Ssim_File_Operations):
         current_ssim = calc_ssim(image1, image2, channel_axis=2)
         current_ssim = round(current_ssim, 4)
         self.set(index,current_ssim)
+        print ("calculating ssim")
         return current_ssim
 
     def clear_values(self, total_images: int):

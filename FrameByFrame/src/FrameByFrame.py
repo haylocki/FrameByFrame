@@ -510,7 +510,10 @@ class Ui(QtWidgets.QMainWindow):
             self.next_image.load(self.image_counter + 1, self.image_dir)
             self.enhance_image(self.editing_image, self.image_counter)
             self.enhance_image(self.next_image, self.image_counter + 1)
-            self.update_ssim()
+            
+            if not self.scanning:
+                self.update_ssim()
+
             QCoreApplication.processEvents()
 
     def stop_scanning(self):
@@ -528,6 +531,13 @@ class Ui(QtWidgets.QMainWindow):
         while self.scanning and self.image_counter < self.total_images:
             ssim_value = self.ssim.get(self.image_counter)
             
+            if ssim_value is None:
+                ssim_value = self.ssim.calculate(
+                    self.image_counter,
+                    self.editing_image.picture,
+                    self.next_image.picture,
+                )
+
             if ssim_value < self.ssim_threshold.value() or ssim_value == IDENTICAL:
                 self.load_next_image()
             else:
