@@ -1,5 +1,20 @@
+<<<<<<< HEAD
 FrameByFrame/.env/
 FrameByFrame/fbfenv/
 FrameByFrame/src/__pycache__/
 FrameByFrame/test/
 FrameByFrame/src/utils/architecture/__pycache__/
+=======
+# Virtual Environments
+fbfenv/
+.venv/
+ENV/
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# example files
+examples/
+>>>>>>> 9db0a41 (original .gitignore went AWOL. Add source files, settings, and ignore rules)
