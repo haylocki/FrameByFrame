@@ -1,13 +1,16 @@
+# pyright: reportAttributeAccessIssue=false
 import fnmatch
 import os
 import sys
-import numpy as np
 from multiprocessing import cpu_count
+
+import numpy as np
 from PyQt6 import QtWidgets
-from PyQt6.QtCore import QCoreApplication, QProcess, QEvent, pyqtSlot
-from PyQt6.QtWidgets import QApplication, QSpinBox
+from PyQt6.QtCore import QCoreApplication, QEvent, QProcess, pyqtSlot
 from PyQt6.QtGui import QGuiApplication
-from PyQt6 import uic
+from PyQt6.QtWidgets import QApplication, QSpinBox
+from PyQt6.uic.load_ui import loadUi
+
 from Copy_Images import Copy_Images
 from Dialogs import Dialogs
 from Gui_Values import Gui_Values
@@ -17,8 +20,8 @@ from Png_To_Video import Png_To_Video
 from Scratch_Remover import Scratch_Remover
 from Settings import Settings
 from Ssim import Ssim
-from Video_To_Png import Video_To_Png
 from Undo import Undo
+from Video_To_Png import Video_To_Png
 
 IDENTICAL = 1.0
 GUI_CONTROLS_HEIGHT = 280
@@ -27,11 +30,13 @@ MINIMUM_IMAGE_SIZE = 14
 
 class Ui(QtWidgets.QMainWindow):
     def __init__(self):
-        super(Ui, self).__init__()
+        super().__init__()
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
         ui_file_path = f"{self.current_dir}/FrameByFrame.ui"
         self.current_dir = os.path.dirname(self.current_dir)
-        uic.loadUi(ui_file_path, self)
+        loadUi(ui_file_path, self)
+        screen = QGuiApplication.primaryScreen()
+        assert screen is not None
         self.png_to_video = Png_To_Video()
         self.copy_images = Copy_Images()
         self.dialogs = Dialogs()
@@ -52,7 +57,7 @@ class Ui(QtWidgets.QMainWindow):
     def init_ui(self) -> None:
         self.loading_image = False
         self.slider = False
-        self.image_dir = None
+        self.image_dir = ""
         self.image_counter = 1
         self.total_images = 1
         self.copy_from_image = 0
@@ -63,7 +68,7 @@ class Ui(QtWidgets.QMainWindow):
         self.enable_enhancement = False
         self.subprocess_proc = None
         self.window_border = 10
-        self.desktop = QGuiApplication.primaryScreen().geometry()
+        self.desktop = self.screen.geometry()
         self.screen_width = self.desktop.width() - self.window_border
         self.screen_height = self.desktop.height() - self.window_border
         self.threads_spinbox.setMaximum(cpu_count())

@@ -10,9 +10,9 @@ class Image:
     def __init__(self, image_frame, image_label):
         self.picture_frame = image_frame
         self.picture_label = image_label
-        self.picture = np.zeros(
+        self.picture: np.ndarray = np.zeros(
             (MINIMUM_IMAGE_SIZE, MINIMUM_IMAGE_SIZE, 3), dtype=np.uint8
-        )
+)
 
     def load(self, image_counter: int, image_dir: str):
         try:

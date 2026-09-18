@@ -31,7 +31,7 @@ class Image_Processing_Worker(QRunnable):
         parent=None,
         progress_callback=None,
     ):
-        super(Image_Processing_Worker, self).__init__()
+        super().__init__()
         self.signals = Image_Processing_Worker_Signals()
         self.gui_values = gui_values
         self.current_dir = current_dir
