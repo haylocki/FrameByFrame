@@ -1,10 +1,12 @@
 import cv2
+import numpy as np
+from PyQt6.QtCore import QSize
+
 from Blending import Blending
 from Brush_Radius import Brush_Radius
 from Gui_Values import Gui_Values
+from Image import Image
 from Mask_Mouse_Callback import Mask_Mouse_Callback
-import numpy as np
-from PyQt6.QtCore import QSize
 from Scale_Image import Scale_Image
 
 EQUALS = 61
@@ -20,13 +22,13 @@ class Mask:
         self.blend = Blending()
         self.brush_radius = Brush_Radius()
         self.blended_image = None
-        self.picture = None
+        self.picture = np.ndarray
         self.brush_size = 20
         self.callback_data = {
             "brush_size": self.brush_size,
         }
 
-    def create(self, editing_image: np.ndarray, gui_values: Gui_Values):
+    def create(self, editing_image: Image, gui_values: Gui_Values):
         height, width = editing_image.picture.shape[:2]
         height = height + gui_values.crop_top + gui_values.crop_bottom
         width = width + gui_values.crop_left + gui_values.crop_right

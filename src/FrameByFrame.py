@@ -326,13 +326,13 @@ class Ui(QtWidgets.QMainWindow):
 
     def mask_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
-        self.mask.edit(
-            self.editing_image.picture, QGuiApplication.primaryScreen().size()
-        )
+        self.mask.edit(self.editing_image.picture, self.screen.size())
 
     def remove_scratch_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
         self.next_image.load(self.image_counter + 1, self.image_dir)
+        screen = QGuiApplication.primaryScreen()
+        assert screen is not None
         # If we are on the first frame, we cannot copy from the previous frame
         if self.image_counter > 2:
             self.previous_image.load(self.image_counter - 1, self.image_dir)
@@ -343,7 +343,7 @@ class Ui(QtWidgets.QMainWindow):
             self.editing_image.picture,
             self.previous_image.picture,
             self.next_image.picture,
-            QGuiApplication.primaryScreen().size(),
+            screen.size(),
         ):
             self.copy_images.backup.image(
                 self.image_counter, self.image_dir, self.backup_dir
