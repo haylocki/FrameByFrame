@@ -31,7 +31,7 @@ class Image_Processing_Worker(QRunnable):
         parent=None,
         progress_callback=None,
     ):
-        super(Image_Processing_Worker, self).__init__()
+        super().__init__()
         self.signals = Image_Processing_Worker_Signals()
         self.gui_values = gui_values
         self.current_dir = current_dir
@@ -62,6 +62,9 @@ class Image_Processing_Worker(QRunnable):
 
     def run(self):
         # TensorFlow models
+        assert self.progress_callback is not None
+        assert self.parent is not None
+
         if (
             self.gui_values.scaling[:4] == "fsrc"
             or self.gui_values.scaling[:4] == "edsr"
@@ -101,7 +104,12 @@ class Image_Processing_Worker(QRunnable):
             try:
                 if not os.path.isfile(f"{self.enhanced_dir}{image_counter:06d}.png"):
                     self.image.load(image_counter, self.image_dir)
-
+                    print(
+                        f"frame={image_counter}, "
+                        f"ssim={self.ssim.get(image_counter - 1)}, "
+                        f"previous={prev_file_path}, "
+                        f"exists={os.path.exists(prev_file_path)}"
+                    )
                     if self.ssim.get(image_counter - 1) == IDENTICAL and os.path.exists(
                         prev_file_path
                     ):
@@ -125,7 +133,7 @@ class Image_Processing_Worker(QRunnable):
                             )
 
                         self.image.save(image_counter, self.enhanced_dir)
-            except Exception as e:
+            except Exception as e: # noqa: BLE001
                 self.parent.processing_error.emit(
                     f"Error processing image {image_counter}: {e}"
                 )

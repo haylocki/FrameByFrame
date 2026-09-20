@@ -35,8 +35,8 @@ class Ui(QtWidgets.QMainWindow):
         ui_file_path = f"{self.current_dir}/FrameByFrame.ui"
         self.current_dir = os.path.dirname(self.current_dir)
         loadUi(ui_file_path, self)
-        screen = QGuiApplication.primaryScreen()
-        assert screen is not None
+        self.screen = QGuiApplication.primaryScreen()
+        assert self.screen is not None
         self.png_to_video = Png_To_Video()
         self.copy_images = Copy_Images()
         self.dialogs = Dialogs()
@@ -80,7 +80,7 @@ class Ui(QtWidgets.QMainWindow):
             self.phi_spinbox,
             self.theta_spinbox,
             self.compress_spinbox,
-            self.image_mask_button,
+            self.mask_button,
             self.previous,
             self.image_slider,
             self.remove_scratch,
@@ -104,7 +104,7 @@ class Ui(QtWidgets.QMainWindow):
             self.copy,
             self.undo_button,
             self.next,
-            self.image_mask_button,
+            self.mask_button,
             self.image_slider,
             self.copy_from,
             self.copy_to,
@@ -162,7 +162,7 @@ class Ui(QtWidgets.QMainWindow):
         self.copy.clicked.connect(self.copy_pressed)
         self.copy_from.clicked.connect(self.copy_from_pressed)
         self.copy_to.clicked.connect(self.copy_to_pressed)
-        self.image_mask_button.clicked.connect(self.image_mask_pressed)
+        self.mask_button.clicked.connect(self.mask_pressed)
         self.undo_button.clicked.connect(self.undo_pressed)
         self.remove_scratch.clicked.connect(self.remove_scratch_pressed)
         self.scan.clicked.connect(self.scan_images)

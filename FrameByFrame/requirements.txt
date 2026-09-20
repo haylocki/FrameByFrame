@@ -1,9 +1,0 @@
-pip
-wheel
-numpy==1.26.4
-typing-extensions
-ssim
-psutil
-opencv-contrib-python==4.9.0.80
-basicsr
-pyqt6
