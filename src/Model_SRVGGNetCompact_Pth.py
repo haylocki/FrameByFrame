@@ -1,10 +1,13 @@
 import torch
+
 from Model_Pth import Model_Pth
 from utils.architecture.SRVGGNet import SRVGGNetCompact
 
 
 class Model_SRVGGNetCompact_Pth(Model_Pth):
     def create_model(self):
+        assert self.model_file_path is not None
+        
         state_dict = torch.load(
             self.model_file_path, map_location=torch.device(self.device)
         )

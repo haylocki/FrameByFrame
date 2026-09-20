@@ -1,8 +1,9 @@
 import cv2
-from Brush_Radius import Brush_Radius
-from Editor_Mouse_Callback import Editor_Mouse_Callback
 import numpy as np
 from PyQt6.QtCore import QSize
+
+from Brush_Radius import Brush_Radius
+from Editor_Mouse_Callback import Editor_Mouse_Callback
 from Scale_Image import Scale_Image
 
 EQUALS = 61

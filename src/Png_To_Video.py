@@ -1,13 +1,14 @@
-import cv2
 import os
+
+import cv2
+from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QMainWindow
 
 from Create_Enhanced_Pngs import Enhanced_Png_Creator as cep
 from Dialogs import Dialogs
 from Ffmpeg_Utils import Ffmpeg_Utils
 from Gui_Values import Gui_Values
 from Ssim import Ssim
-from PyQt6.QtCore import pyqtSignal, QObject
-from PyQt6.QtWidgets import QMainWindow
 
 
 class Png_To_Video(QObject):
@@ -21,7 +22,7 @@ class Png_To_Video(QObject):
         self.dialogs = Dialogs()
         self.cep.processing_finished.connect(self.run_ffmpeg)
         self.ffmpeg_utils = Ffmpeg_Utils(self.progress_signal.emit)
-        self.ffmpeg_utils.finished_signal.connect(self.encoding_finished)
+        self.ffmpeg_utils.finished_signal.connect(self.on_encoding_finished)
 
     def convert_png_to_video(
         self,
@@ -70,6 +71,6 @@ class Png_To_Video(QObject):
             self.output_file,
         )
 
-    def encoding_finished(self):
+    def on_encoding_finished(self):
         self.dialogs.encoding_finished_dialog()
         self.finished_signal.emit()

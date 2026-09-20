@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import functools
 import math
@@ -7,7 +6,8 @@ import re
 from collections import OrderedDict
 
 import torch
-import torch.nn as nn
+from torch import nn
+
 import utils.architecture.block as B
 
 

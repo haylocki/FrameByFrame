@@ -1,5 +1,6 @@
-import cv2
 import os
+
+import cv2
 import numpy as np
 import torch
 
@@ -13,6 +14,7 @@ class Model_Pth:
         self.scale = 4
         self.single_scale = False
         self.required_scale = 4
+        self.model: torch.nn.Module
 
     def set_scaling_model(
         self,

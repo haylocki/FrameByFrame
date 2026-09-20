@@ -1,5 +1,6 @@
-import cv2
 import os
+
+import cv2
 import numpy as np
 import torch
 
@@ -9,7 +10,7 @@ class Model_Pb:
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
         self.scaling = None
         self.model_file_path = None
-        self.model = cv2.dnn_superres.DnnSuperResImpl_create()
+        self.model = cv2.dnn_superres.DnnSuperResImpl_create()  # type: ignore[attr-defined]
 
     def scale_image(self, image: np.ndarray) -> np.ndarray:
         image = self.model.upsample(image)

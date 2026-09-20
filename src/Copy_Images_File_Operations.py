@@ -32,5 +32,5 @@ class Copy_Images_File_Operations:
             self.image_2.save(image_counter + delta, image_dir)
             ssim.set(image_counter, 0)
             ssim.calculate(image_counter, self.image_1.picture, self.image_2.picture)
-        except IOError as e:
+        except OSError as e:
             print(f"Error copying file: {e}")

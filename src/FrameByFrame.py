@@ -40,7 +40,7 @@ class Ui(QtWidgets.QMainWindow):
         self.png_to_video = Png_To_Video()
         self.copy_images = Copy_Images()
         self.dialogs = Dialogs()
-        self.mask = Mask()
+        self.image_mask = Mask()
         self.scratch_remover = Scratch_Remover()
         self.gui_values = Gui_Values()
         self.settings = Settings(self.current_dir)
@@ -80,7 +80,7 @@ class Ui(QtWidgets.QMainWindow):
             self.phi_spinbox,
             self.theta_spinbox,
             self.compress_spinbox,
-            self.mask_button,
+            self.image_mask_button,
             self.previous,
             self.image_slider,
             self.remove_scratch,
@@ -104,7 +104,7 @@ class Ui(QtWidgets.QMainWindow):
             self.copy,
             self.undo_button,
             self.next,
-            self.mask_button,
+            self.image_mask_button,
             self.image_slider,
             self.copy_from,
             self.copy_to,
@@ -162,7 +162,7 @@ class Ui(QtWidgets.QMainWindow):
         self.copy.clicked.connect(self.copy_pressed)
         self.copy_from.clicked.connect(self.copy_from_pressed)
         self.copy_to.clicked.connect(self.copy_to_pressed)
-        self.mask_button.clicked.connect(self.mask_pressed)
+        self.image_mask_button.clicked.connect(self.image_mask_pressed)
         self.undo_button.clicked.connect(self.undo_pressed)
         self.remove_scratch.clicked.connect(self.remove_scratch_pressed)
         self.scan.clicked.connect(self.scan_images)
@@ -326,7 +326,7 @@ class Ui(QtWidgets.QMainWindow):
 
     def mask_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
-        self.mask.edit(self.editing_image.picture, self.screen.size())
+        self.image_mask.edit(self.editing_image.picture, self.screen.size())
 
     def remove_scratch_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
@@ -365,7 +365,7 @@ class Ui(QtWidgets.QMainWindow):
             self.copy_from_image,
             self.copy_to_image,
             self.ssim,
-            self.mask,
+            self.image_mask,
         )
 
         if self.image_counter < self.total_images:
@@ -389,7 +389,7 @@ class Ui(QtWidgets.QMainWindow):
             self.copy_from_image,
             self.copy_to_image,
             self.ssim,
-            self.mask,
+            self.image_mask,
         )
         self.image_counter = self.copy_to_image
         self.copy_from_image = 0
@@ -447,7 +447,7 @@ class Ui(QtWidgets.QMainWindow):
             self.progress_bar.setValue(0)
             self.image_slider.setValue(1)
             self.load_images()
-            self.mask.create(self.editing_image, self.gui_values)
+            self.image_mask.create(self.editing_image, self.gui_values)
             self.resize_window()
             self.enable_buttons()
 
@@ -471,7 +471,7 @@ class Ui(QtWidgets.QMainWindow):
 
             if self.total_images > 1:
                 self.load_images()
-                self.mask.create(self.editing_image, self.gui_values)
+                self.image_mask.create(self.editing_image, self.gui_values)
                 self.image_slider.setMaximum(self.total_images)
                 self.action_convert_to_video.setEnabled(True)
                 self.enable_buttons()
@@ -574,17 +574,22 @@ class Ui(QtWidgets.QMainWindow):
             self.save_settings()
             self.ssim.save(self.image_dir)
 
-        if self.subprocess_proc is not None:
-            if self.subprocess_proc.state() == QProcess.Running:
-                self.subprocess_proc.terminate()
-                self.subprocess_proc.wait_for_finished()
+        if (
+            self.subprocess_proc is not None
+            and self.subprocess_proc.state() == QProcess.Running
+        ):
+            self.subprocess_proc.terminate()
+            self.subprocess_proc.wait_for_finished()
 
     def quit_application(self):
         self.closing_down()
-        QApplication.instance().quit()
+
+        app = QApplication.instance()
+        assert app is not None
+        app.quit()
 
     def event(self, event):
-        if event.type() == QEvent.Type.Close:
+        if event is not None and event.type() == QEvent.Type.Close:
             self.closing_down()
             event.accept()
 
@@ -593,7 +598,7 @@ class Ui(QtWidgets.QMainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # Create QApplication instance
-    ui = Ui()
+    ui = Ui()  # noqa: F841
     sys.exit(app.exec())
 
 

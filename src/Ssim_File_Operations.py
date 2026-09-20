@@ -4,7 +4,7 @@ import os
 
 class Ssim_File_Operations:
     def __init__(self):
-        self.ssim = []
+        self.ssim: list[float] = []
 
     def save(self, image_dir: str):
         file_path = f"{image_dir}ssim_values.txt"

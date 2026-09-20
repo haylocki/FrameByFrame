@@ -1,12 +1,14 @@
-import numpy as np
-import psutil
 import time
+
+import psutil
 from PyQt6.QtCore import QObject, QThreadPool, pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
+
 from Enhanced_File_Operations import Enhanced_File_Operations
 from Gui_Values import Gui_Values
 from Image_Processing import Image_Processing_Worker
 from Ssim import Ssim
+
 
 class Enhanced_Png_Creator(QObject):
     processing_finished = pyqtSignal()
@@ -21,7 +23,7 @@ class Enhanced_Png_Creator(QObject):
     def create_enhanced_pngs(
         self,
         gui_values: Gui_Values,
-        image_dir: np.ndarray,
+        image_dir: str,
         current_dir: str,
         total_images: int,
         ssim: Ssim,

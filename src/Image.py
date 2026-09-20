@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
-from Gui_Values import Gui_Values
 from PyQt6.QtGui import QImage, QPixmap
+
+from Gui_Values import Gui_Values
 
 MINIMUM_IMAGE_SIZE = 14
 
@@ -12,7 +13,7 @@ class Image:
         self.picture_label = image_label
         self.picture: np.ndarray = np.zeros(
             (MINIMUM_IMAGE_SIZE, MINIMUM_IMAGE_SIZE, 3), dtype=np.uint8
-)
+        )
 
     def load(self, image_counter: int, image_dir: str):
         try:
@@ -32,7 +33,7 @@ class Image:
         self.picture_frame.setPixmap(pixmap_image)
 
     def display_image_number(self, image_counter: int):
-        self.picture_label.setText("{:06d}".format(image_counter))
+        self.picture_label.setText(f"{image_counter:06d}")
 
     def white_balance(self):
         img_LAB = cv2.cvtColor(self.picture, cv2.COLOR_BGR2LAB)
@@ -83,20 +84,21 @@ class Image:
             self.picture / (max_intensity / gui_values.theta)
         ) ** gui_values.compress
 
-        self.picture = np.int16(self.picture)
+        self.picture = self.picture.astype(np.int16)
         self.picture = (
             self.picture * (gui_values.alpha / 127 + 1)
             - gui_values.alpha
             + gui_values.beta
         )
         self.picture = np.clip(self.picture, 0, 255)
-        self.picture = np.uint8(self.picture)
+        self.picture = self.picture.astype(np.uint8)
 
     @staticmethod
-    def convert_cv2_to_qimage(cv2Image: np.ndarray):
+    def convert_cv2_to_qimage(cv2Image: np.ndarray) -> QImage:
         height, width, channel = cv2Image.shape
         bytes_per_line = channel * width
+
         qImage = QImage(
             cv2Image.data, width, height, bytes_per_line, QImage.Format.Format_BGR888
-        )
+        ) 
         return qImage

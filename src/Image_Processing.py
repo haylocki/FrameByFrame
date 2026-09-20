@@ -62,6 +62,9 @@ class Image_Processing_Worker(QRunnable):
 
     def run(self):
         # TensorFlow models
+        assert self.progress_callback is not None
+        assert self.parent is not None
+
         if (
             self.gui_values.scaling[:4] == "fsrc"
             or self.gui_values.scaling[:4] == "edsr"
@@ -91,23 +94,23 @@ class Image_Processing_Worker(QRunnable):
         white_balance = self.gui_values.white_balance
         enable_enhancement = self.gui_values.enable_enhancement
 
-        for image_counter in range(self.start_image_index, self.end_image_index):
+        for frame_index in range(self.start_image_index, self.end_image_index):
             # Percentage for frame enhancing is 0%-50%
             progress_percentage = (
                 self.count_files(self.enhanced_dir) * 50
             ) // self.total_images
             self.progress_callback.emit(progress_percentage)
-            prev_file_path = f"{self.enhanced_dir}{image_counter - 1:06d}.png"
+            prev_file_path = f"{self.enhanced_dir}{frame_index - 1:06d}.png"
             try:
-                if not os.path.isfile(f"{self.enhanced_dir}{image_counter:06d}.png"):
-                    self.image.load(image_counter, self.image_dir)
+                if not os.path.isfile(f"{self.enhanced_dir}{frame_index:06d}.png"):
+                    self.image.load(frame_index, self.image_dir)
 
-                    if self.ssim.get(image_counter - 1) == IDENTICAL and os.path.exists(
+                    if self.ssim.get(frame_index - 1) == IDENTICAL and os.path.exists(
                         prev_file_path
                     ):
                         shutil.copy(
                             prev_file_path,
-                            f"{self.enhanced_dir}{image_counter:06d}.png",
+                            f"{self.enhanced_dir}{frame_index:06d}.png",
                         )
 
                     else:
@@ -124,10 +127,10 @@ class Image_Processing_Worker(QRunnable):
                                 self.image.picture
                             )
 
-                        self.image.save(image_counter, self.enhanced_dir)
-            except Exception as e:
+                        self.image.save(frame_index, self.enhanced_dir)
+            except Exception as e:  # noqa: BLE001
                 self.parent.processing_error.emit(
-                    f"Error processing image {image_counter}: {e}"
+                    f"Error processing image {frame_index}: {e}"
                 )
                 return
 

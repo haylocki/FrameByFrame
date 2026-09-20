@@ -1,7 +1,10 @@
 import os
 import shutil
-from Dialogs import Dialogs
+
 from PyQt6.QtWidgets import QMainWindow
+
+from Dialogs import Dialogs
+
 
 class Enhanced_File_Operations:
     def __init__(self, enhanced_dir: str):
@@ -9,9 +12,12 @@ class Enhanced_File_Operations:
 
     def remove(self, window: QMainWindow):
         try:
-            if os.path.exists(self.enhanced_dir) and os.listdir(self.enhanced_dir):
-                if Dialogs.overwrite_dialog(window):
-                    shutil.rmtree(self.enhanced_dir)
+            if (
+                os.path.exists(self.enhanced_dir)
+                and os.listdir(self.enhanced_dir)
+                and Dialogs.overwrite_dialog(window)
+            ):
+                shutil.rmtree(self.enhanced_dir)
         except OSError as e:
             print(f"Error removing enhanced directory: {e}")
 

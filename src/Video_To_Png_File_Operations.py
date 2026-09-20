@@ -1,9 +1,11 @@
-import cv2
-import numpy as np
 import os
 import shutil
-from Dialogs import Dialogs
+
+import cv2
+import numpy as np
 from PyQt6.QtWidgets import QMainWindow
+
+from Dialogs import Dialogs
 
 
 class Video_To_Png_File_Operations:
@@ -15,7 +17,7 @@ class Video_To_Png_File_Operations:
         self.frame_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.frame_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    def read_frame(self, video: np.ndarray, image_counter: int) -> np.ndarray:
+    def read_frame(self, video: cv2.VideoCapture, image_counter: int) -> np.ndarray:
         success, image = video.read()
         if not success:
             print(f"Error reading frame {image_counter}")
@@ -29,11 +31,11 @@ class Video_To_Png_File_Operations:
         if os.path.exists(file_path):
             try:
                 os.remove(file_path)
-            except Exception as e:
+            except OSError as e:
                 print(f"Error removing file {file_path}: {e}")
 
     @staticmethod
-    def open_video(selected_file: str) -> cv2.VideoCapture:
+    def open_video(selected_file: str) -> cv2.VideoCapture | None:
         video = cv2.VideoCapture(selected_file)
 
         if not video.isOpened():
@@ -47,11 +49,12 @@ class Video_To_Png_File_Operations:
         return int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
     @staticmethod
-    def write_frame(output_file: str, image: cv2.VideoCapture):
+    def write_frame(output_file: str, image: np.ndarray):
         try:
-            # Save the image as a png image
-            cv2.imwrite(output_file, image)
-        except Exception as e:
+            success = cv2.imwrite(output_file, image)
+            if not success:
+                raise OSError(f"Failed to save image {output_file}")
+        except OSError as e:
             print(f"Error saving image {output_file}: {e}")
 
     @staticmethod
@@ -64,7 +67,7 @@ class Video_To_Png_File_Operations:
                     if os.path.exists(image_dir):
                         shutil.rmtree(image_dir)
                         os.makedirs(image_dir)
-                except Exception as e:
+                except OSError as e:
                     print(f"Error creating image directory: {e}")
             else:
                 result = False

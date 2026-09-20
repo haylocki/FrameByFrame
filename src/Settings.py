@@ -1,5 +1,6 @@
 import json
 import os
+
 from Gui_Values import Gui_Values
 
 
@@ -18,7 +19,7 @@ class Settings:
             with open(file_path, "r") as file:
                 settings_dict = json.load(file)
                 gui_values.__dict__.update(settings_dict)
-        except IOError as e:
+        except OSError as e:
             print(f"Error loading settings: {e}")
 
         return gui_values
@@ -30,5 +31,5 @@ class Settings:
         try:
             with open(file_path, "w") as file:
                 json.dump(settings_dict, file)
-        except IOError as e:
+        except OSError as e:
             print(f"Error saving settings: {e}")

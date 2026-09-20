@@ -22,7 +22,7 @@ class Mask:
         self.blend = Blending()
         self.brush_radius = Brush_Radius()
         self.blended_image = None
-        self.picture = np.ndarray
+        self.picture : np.ndarray
         self.brush_size = 20
         self.callback_data = {
             "brush_size": self.brush_size,
@@ -38,7 +38,7 @@ class Mask:
         self,
         editing_image: np.ndarray,
         screen_size: QSize,
-    ) -> bool:
+    ):
         self.blended_image = self.blend.blend_mask(editing_image, self.picture)
         scaled_width, scaled_height, top, left = self.si.scale_image(
             editing_image, screen_size
@@ -54,7 +54,7 @@ class Mask:
         cv2.setMouseCallback(
             "Mask Image",
             mouse_callback_handler.mouse_callback_wrapper,
-            (editing_image, self.picture, self.callback_data),
+            (editing_image, self.picture, self.callback_data)
         )
 
         while True:

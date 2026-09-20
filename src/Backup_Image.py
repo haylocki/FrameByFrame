@@ -16,7 +16,7 @@ class Backup_Image:
 
         try:
             shutil.copyfile(file_to_backup, file_path_to_copy_to)
-        except IOError as e:
+        except OSError as e:
             print(f"Error copying file for backup: {e}")
 
     @staticmethod

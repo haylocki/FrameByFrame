@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
+
 from Blending import Blending
-from typing import Tuple
 
 MINIMUM_AFFECTED_AREA = 7
 RESET_PREVIOUS_COORDS = -1
@@ -23,7 +23,7 @@ class Mask_Mouse_Callback:
         x: int,
         y: int,
         flags: int,
-        parameters: Tuple[np.ndarray, np.ndarray, np.ndarray, dict] | None,
+        parameters: tuple[np.ndarray, np.ndarray, dict] | None,
     ) -> None:
 
         if parameters is None:

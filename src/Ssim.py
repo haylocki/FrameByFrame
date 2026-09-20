@@ -1,3 +1,5 @@
+from typing import cast
+
 import numpy as np
 from skimage.metrics import structural_similarity as calc_ssim
 
@@ -12,9 +14,12 @@ class Ssim(Ssim_File_Operations):
         self.ssim[index] = value
 
     def calculate(self, index: int, image1: np.ndarray, image2: np.ndarray) -> float:
-        current_ssim = self.ssim[index]
+        current_ssim: float = self.ssim[index]
         if current_ssim == 0:
-            current_ssim = calc_ssim(image1, image2, channel_axis=2)
+            current_ssim = cast(
+                float,
+                calc_ssim(image1, image2, channel_axis=2, full=False, gradient=False),
+            )
             current_ssim = round(current_ssim, 4)
         return current_ssim
 

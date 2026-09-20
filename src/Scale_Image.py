@@ -1,13 +1,12 @@
 import numpy as np
 from PyQt6.QtCore import QSize
-from typing import Tuple
 
 SIZE_OF_WINDOW_DECORATIONS = 100
 
 
 class Scale_Image:
     @staticmethod
-    def scale_image(image: np.ndarray, screen_size: QSize) -> Tuple[int, int, int, int]:
+    def scale_image(image: np.ndarray, screen_size: QSize) -> tuple[int, int, int, int]:
         # subtract 100 to make whole image fit on screen
         screen_width = screen_size.width() - SIZE_OF_WINDOW_DECORATIONS
         screen_height = screen_size.height() - SIZE_OF_WINDOW_DECORATIONS

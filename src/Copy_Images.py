@@ -32,11 +32,11 @@ class Copy_Images(Copy_Images_File_Operations):
         if copy_from_image > copy_to_image:
             delta = BACKWARDS
 
-        for image_counter in self.custom_range(copy_from_image, copy_to_image):
-            self.backup.image(image_counter + delta, image_dir, backup_dir)
+        for frame_index in self.custom_range(copy_from_image, copy_to_image):
+            self.backup.image(frame_index + delta, image_dir, backup_dir)
             self.copy_image(
                 ssim,
-                image_counter,
+                frame_index,
                 mask,
                 image_dir,
                 delta,

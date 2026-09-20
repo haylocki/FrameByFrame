@@ -1,11 +1,12 @@
 import os
 import shutil
+
 from PyQt6.QtCore import QObject, QRunnable, pyqtSignal
 
 from Image import Image
 from Model_Pb import Model_Pb
-from Model_SRVGGNetCompact_Pth import Model_SRVGGNetCompact_Pth
 from Model_Rrdbnet_Pth import Model_Rrdbnet_Pth
+from Model_SRVGGNetCompact_Pth import Model_SRVGGNetCompact_Pth
 
 IDENTICAL = 1.0
 MULTIPLE_SCALES = False

@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QFileDialog, QMessageBox, QMainWindow
+from PyQt6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
 
 
 class Dialogs:

@@ -1,6 +1,9 @@
 import re
-from PyQt6.QtCore import QProcess, QObject, pyqtSlot, pyqtSignal
+
+from PyQt6.QtCore import QObject, QProcess, pyqtSignal, pyqtSlot
+
 from Gui_Values import Gui_Values
+
 
 class Ffmpeg_Utils(QObject):
     finished_signal = pyqtSignal()

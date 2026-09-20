@@ -1,7 +1,8 @@
-from PyQt6.QtWidgets import QMainWindow
 from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QMainWindow
+
 from Video_To_Png_File_Operations import Video_To_Png_File_Operations
-import cv2
+
 
 class Video_To_Png(QObject):
     progress_signal = pyqtSignal(int)
