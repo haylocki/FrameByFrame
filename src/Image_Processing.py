@@ -135,4 +135,3 @@ class Image_Processing_Worker(QRunnable):
                 return
 
         self.signals.finished.emit()
-
