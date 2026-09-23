@@ -93,9 +93,8 @@ class Enhanced_Png_Creator(QObject):
 
     def fill_missing_frames(self) -> None:
         """Sequential cleanup pass: copies forward any identical frame that
-        was skipped during parallel processing because its predecessor
-        wasn't finished yet. Must run strictly in order so cascades of
-        consecutive identical frames resolve correctly."""
+        was skipped during parallel processing. Must run strictly in order
+        so cascades of consecutive identical frames resolve correctly."""
         for frame_index in range(1, self.total_images + 1):
             current_path = f"{self.enhanced_dir}{frame_index:06d}.png"
             if os.path.isfile(current_path):

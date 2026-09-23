@@ -1,6 +1,8 @@
 import os
 import shutil
 
+BACKUP_NUMBER_START = -7
+BACKUP_NUMBER_END = -4
 
 class Backup_Image:
     @staticmethod
@@ -30,21 +32,18 @@ class Backup_Image:
         return f"{backup_dir}{filename_without_ext}_{count_str}.png"
 
     @staticmethod
-    def find_last_backup(file_path_to_copy_to: str, backup_dir: str):
-        backup_count = 1
+    def find_last_backup(file_path_to_copy_to: str, backup_dir: str) -> str:
+        basename = os.path.basename(file_path_to_copy_to)
+        filename_without_ext = os.path.splitext(basename)[0]
+        prefix = f"{filename_without_ext}_"
 
-        while True:
-            file_path_from = Backup_Image.get_backup_file_path(
-                file_path_to_copy_to, backup_count, backup_dir
-            )
+        highest_count = 0
+        for entry in os.listdir(backup_dir):
+            if entry.startswith(prefix):
+                count_str = entry[BACKUP_NUMBER_START:BACKUP_NUMBER_END]
+                if count_str.isdigit():
+                    highest_count = max(highest_count, int(count_str))
 
-            if not os.path.isfile(file_path_from):
-                break
-
-            backup_count += 1
-
-        file_path_from = Backup_Image.get_backup_file_path(
-            file_path_to_copy_to, backup_count - 1, backup_dir
+        return Backup_Image.get_backup_file_path(
+            file_path_to_copy_to, highest_count, backup_dir
         )
-
-        return file_path_from
