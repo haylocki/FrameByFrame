@@ -1,5 +1,5 @@
 import os
-import shutil
+import queue
 
 from PyQt6.QtCore import QObject, QRunnable, pyqtSignal
 
@@ -20,8 +20,8 @@ class Image_Processing_Worker_Signals(QObject):
 class Image_Processing_Worker(QRunnable):
     def __init__(
         self,
-        start_image_index,
-        end_image_index,
+        frame_queue,
+        device,
         enhanced_dir,
         gui_values,
         ssim,
@@ -33,14 +33,13 @@ class Image_Processing_Worker(QRunnable):
     ):
         super().__init__()
         self.signals = Image_Processing_Worker_Signals()
+        self.frame_queue = frame_queue
+        self.device = device
         self.gui_values = gui_values
         self.current_dir = current_dir
         self.image_dir = image_dir
         self.enhanced_dir = enhanced_dir
-        self.start_image_index = start_image_index
-        self.end_image_index = end_image_index
         self.ssim = ssim
-        self.image_dir = image_dir
         self.total_images = total_images
         self.parent = parent
         self.progress_callback = progress_callback
@@ -57,21 +56,63 @@ class Image_Processing_Worker(QRunnable):
     def setup_model(self, model, single_scale: bool) -> None:
         self.scale_model = model
         self.scale_model.set_single_scale(single_scale)
-        self.scale_model.set_scaling_model(self.gui_values.scaling, self.current_dir)
+        self.scale_model.set_scaling_model(
+            self.gui_values.scaling, self.current_dir, self.device
+        )
         self.scale_model.create_model()
 
-    def run(self):
-        # TensorFlow models
+    def process_frame(self, frame_index: int) -> bool:
         assert self.progress_callback is not None
         assert self.parent is not None
 
+        white_balance = self.gui_values.white_balance
+        enable_enhancement = self.gui_values.enable_enhancement
+
+        frames_remaining = self.frame_queue.qsize()
+        frames_attempted = self.total_images - frames_remaining
+        progress_percentage = (frames_attempted * 50) // self.total_images
+        self.progress_callback.emit(progress_percentage)
+
+        try:
+            if (
+                not os.path.isfile(f"{self.enhanced_dir}{frame_index:06d}.png")
+                and self.ssim.get(frame_index - 1) != IDENTICAL
+            ):
+                self.image.load(frame_index, self.image_dir)
+                self.image.crop(self.gui_values)
+
+                if enable_enhancement:
+                    self.image.colour_enhance(self.gui_values)
+
+                if white_balance:
+                    self.image.white_balance()
+
+                if self.gui_values.scaling != "None":
+                    self.image.picture = self.scale_model.scale_image(
+                        self.image.picture
+                    )
+
+                self.image.save(frame_index, self.enhanced_dir)
+        except Exception as e:  # noqa: BLE001
+            self.parent.processing_error.emit(
+                f"Error processing image {frame_index}: {e}"
+            )
+            return False
+
+        return True
+
+    def run(self):
+        assert self.progress_callback is not None
+        assert self.parent is not None
+
+        # TensorFlow models
         if (
             self.gui_values.scaling[:4] == "fsrc"
             or self.gui_values.scaling[:4] == "edsr"
         ):
             self.scale_model = Model_Pb()
             self.scale_model.set_scaling_model(
-                self.gui_values.scaling, self.current_dir
+                self.gui_values.scaling, self.current_dir, self.device
             )
 
         # pytorch models
@@ -91,47 +132,14 @@ class Image_Processing_Worker(QRunnable):
             self.setup_model(Model_Rrdbnet_Pth(), SINGLE_SCALE)
 
         self.image = Image(None, None)
-        white_balance = self.gui_values.white_balance
-        enable_enhancement = self.gui_values.enable_enhancement
 
-        for frame_index in range(self.start_image_index, self.end_image_index):
-            # Percentage for frame enhancing is 0%-50%
-            progress_percentage = (
-                self.count_files(self.enhanced_dir) * 50
-            ) // self.total_images
-            self.progress_callback.emit(progress_percentage)
-            prev_file_path = f"{self.enhanced_dir}{frame_index - 1:06d}.png"
+        while True:
             try:
-                if not os.path.isfile(f"{self.enhanced_dir}{frame_index:06d}.png"):
-                    self.image.load(frame_index, self.image_dir)
+                frame_index = self.frame_queue.get_nowait()
+            except queue.Empty:
+                break
 
-                    if self.ssim.get(frame_index - 1) == IDENTICAL and os.path.exists(
-                        prev_file_path
-                    ):
-                        shutil.copy(
-                            prev_file_path,
-                            f"{self.enhanced_dir}{frame_index:06d}.png",
-                        )
-
-                    else:
-                        self.image.crop(self.gui_values)
-
-                        if enable_enhancement:
-                            self.image.colour_enhance(self.gui_values)
-
-                        if white_balance:
-                            self.image.white_balance()
-
-                        if self.gui_values.scaling != "None":
-                            self.image.picture = self.scale_model.scale_image(
-                                self.image.picture
-                            )
-
-                        self.image.save(frame_index, self.enhanced_dir)
-            except Exception as e:  # noqa: BLE001
-                self.parent.processing_error.emit(
-                    f"Error processing image {frame_index}: {e}"
-                )
+            if not self.process_frame(frame_index):
                 return
 
         self.signals.finished.emit()

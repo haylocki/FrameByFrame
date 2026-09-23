@@ -17,11 +17,11 @@ class Model_Pb:
 
         return image
 
-    def set_scaling_model(self, scaling: str, current_dir: str):
+    def set_scaling_model(self, scaling: str, current_dir: str, device: str = "cpu"):
         self.model_file_path = f"{current_dir}/src/models/{scaling}.pb"
         self.model.readModel(self.model_file_path)
         self.model.setModel(scaling[:-2], int(scaling[-1]))
 
-        if torch.cuda.is_available():
+        if device == "cuda" and torch.cuda.is_available():
             self.model.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
             self.model.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)

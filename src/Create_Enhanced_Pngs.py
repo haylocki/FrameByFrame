@@ -1,6 +1,10 @@
+import os
+import queue
+import shutil
 import time
 
 import psutil
+import torch
 from PyQt6.QtCore import QObject, QThreadPool, pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 
@@ -8,6 +12,8 @@ from Enhanced_File_Operations import Enhanced_File_Operations
 from Gui_Values import Gui_Values
 from Image_Processing import Image_Processing_Worker
 from Ssim import Ssim
+
+IDENTICAL = 1.0
 
 
 class Enhanced_Png_Creator(QObject):
@@ -43,23 +49,27 @@ class Enhanced_Png_Creator(QObject):
         self.process_images()
 
     def process_images(self) -> None:
-        max_threads = self.gui_values.threads
-        images_per_thread = self.total_images // max_threads
-        remaining_images = self.total_images % max_threads
         self.completed_threads = 0
 
-        for thread_idx in range(max_threads):
-            # Make sure we have enough memory free to use scaling model
-            self.wait_for_free_memory(1)
-            start_image_index = thread_idx * images_per_thread + 1
-            end_image_index = start_image_index + images_per_thread
+        frame_queue: queue.Queue[int] = queue.Queue()
+        for image_index in range(1, self.total_images + 1):
+            frame_queue.put(image_index)
 
-            if end_image_index + remaining_images >= self.total_images:
-                end_image_index = self.total_images + 1
+        has_gpu = torch.cuda.is_available()
+        gpu_workers = 1 if has_gpu else 0
+        cpu_workers = self.gui_values.threads
+        max_threads = gpu_workers + cpu_workers
 
+        devices = ["cuda"] * gpu_workers + ["cpu"] * cpu_workers
+
+        self.thread_pool.setMaxThreadCount(max_threads)
+        self.wait_for_free_memory(max_threads)
+
+        self.workers = []
+        for device in devices:
             worker = Image_Processing_Worker(
-                start_image_index,
-                end_image_index,
+                frame_queue,
+                device,
                 self.enhanced_dir,
                 self.gui_values,
                 self.ssim,
@@ -70,14 +80,32 @@ class Enhanced_Png_Creator(QObject):
                 self.progress_callback,
             )
             worker.signals.finished.connect(self.check_processing_completion)
+            self.workers.append(worker)
             self.thread_pool.start(worker)
 
     def check_processing_completion(self) -> None:
         self.completed_threads += 1
 
         if self.completed_threads == self.thread_pool.maxThreadCount():
+            self.fill_missing_frames()
             self.thread_pool.clear()
             self.processing_finished.emit()
+
+    def fill_missing_frames(self) -> None:
+        """Sequential cleanup pass: copies forward any identical frame that
+        was skipped during parallel processing because its predecessor
+        wasn't finished yet. Must run strictly in order so cascades of
+        consecutive identical frames resolve correctly."""
+        for frame_index in range(1, self.total_images + 1):
+            current_path = f"{self.enhanced_dir}{frame_index:06d}.png"
+            if os.path.isfile(current_path):
+                continue
+
+            prev_path = f"{self.enhanced_dir}{frame_index - 1:06d}.png"
+            if self.ssim.get(frame_index - 1) == IDENTICAL and os.path.exists(
+                prev_path
+            ):
+                shutil.copy(prev_path, current_path)
 
     @staticmethod
     def wait_for_free_memory(target_memory_gb: int) -> None:

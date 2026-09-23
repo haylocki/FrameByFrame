@@ -20,6 +20,7 @@ class Model_Pth:
         self,
         scaling: str,
         current_dir: str,
+        device: str | None = None,
     ):
         self.scale = int(scaling[-1])
 
@@ -30,13 +31,15 @@ class Model_Pth:
 
         self.model_file_path = f"{current_dir}/src/models/{scaling}.pth"
 
-        self.set_device()
+        self.set_device(device)
 
     def set_single_scale(self, single_scale: bool):
         self.single_scale = single_scale
 
-    def set_device(self):
-        if torch.cuda.is_available():
+    def set_device(self, device: str | None = None):
+        if device is not None:
+            self.device = device
+        elif torch.cuda.is_available():
             self.device = "cuda"
         else:
             self.device = "cpu"

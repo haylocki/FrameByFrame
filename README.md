@@ -146,7 +146,7 @@ Then select the video you are working on. This will convert the images back into
 
 **CRF:** Sets the ffmpeg x265 constant rate factor
 
-**Threads:** The number of simultaneouly generated frames. If you are using Hardware encoding then this must be set to 1 as Nvidia's CUDA library is not thread safe.
+**Threads:** The number of simultaneouly generated frames. Be aware CPU generated Frames take much longer than GPU generated frames. Set threads to 1 for GPU generated frames only.
 
 **Crop Top:** Allows you to crop the top of the video
 
