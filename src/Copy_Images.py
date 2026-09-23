@@ -33,7 +33,7 @@ class Copy_Images(Copy_Images_File_Operations):
             delta = BACKWARDS
 
         for frame_index in self.custom_range(copy_from_image, copy_to_image):
-            self.backup.image(frame_index + delta, image_dir, backup_dir)
+            self.backup.create_backup_frame(frame_index + delta, image_dir, backup_dir)
             self.copy_image(
                 ssim,
                 frame_index,

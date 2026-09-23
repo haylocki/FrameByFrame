@@ -9,5 +9,6 @@ class Undo:
         
     def copy(self, image_counter: int, image_dir: str, backup_dir: str):
         file_path_to = f"{image_dir}{image_counter:06d}.png"
-        file_path_from = self.backup.find_last_backup(file_path_to, backup_dir)
+        backup_filename = self.backup.find_last_backup(image_counter, backup_dir)
+        file_path_from = f"{backup_dir}{backup_filename}"
         shutil.move(file_path_from, file_path_to)

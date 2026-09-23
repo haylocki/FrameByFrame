@@ -4,14 +4,19 @@ import shutil
 BACKUP_NUMBER_START = -7
 BACKUP_NUMBER_END = -4
 
+
 class Backup_Image:
     @staticmethod
-    def image(image_counter: int, image_dir: str, backup_dir: str):
-        file_to_backup = f"{image_dir}{image_counter:06d}.png"
+    def build_backup_filename(frame_number: int, count: int) -> str:
+        return f"{frame_number:06d}_{count:03d}.png"
+    
+    @staticmethod
+    def create_backup_frame(frame_number: int, image_dir: str, backup_dir: str):
+        file_to_backup = f"{image_dir}{frame_number:06d}.png"
         backup_count = 1
         while os.path.isfile(
             file_path_to_copy_to := Backup_Image.get_backup_file_path(
-                file_to_backup, backup_count, backup_dir
+                frame_number, backup_count, backup_dir
             )
         ):
             backup_count += 1
@@ -23,19 +28,14 @@ class Backup_Image:
 
     @staticmethod
     def get_backup_file_path(
-        file_path_to_copy_to: str, count: int, backup_dir: str
+        image_counter: int, count: int, backup_dir: str
     ) -> str:
-        basename = os.path.basename(file_path_to_copy_to)
-        filename_without_ext = os.path.splitext(basename)[0]
-        count_str = f"{count:03d}"
-
-        return f"{backup_dir}{filename_without_ext}_{count_str}.png"
+        filename = Backup_Image.build_backup_filename(image_counter, count)
+        return f"{backup_dir}{filename}"
 
     @staticmethod
-    def find_last_backup(file_path_to_copy_to: str, backup_dir: str) -> str:
-        basename = os.path.basename(file_path_to_copy_to)
-        filename_without_ext = os.path.splitext(basename)[0]
-        prefix = f"{filename_without_ext}_"
+    def find_last_backup(frame_number: int, backup_dir: str) -> str:
+        prefix = f"{frame_number:06d}_"
 
         highest_count = 0
         for entry in os.listdir(backup_dir):
@@ -44,6 +44,5 @@ class Backup_Image:
                 if count_str.isdigit():
                     highest_count = max(highest_count, int(count_str))
 
-        return Backup_Image.get_backup_file_path(
-            file_path_to_copy_to, highest_count, backup_dir
-        )
+        return Backup_Image.build_backup_filename(frame_number, highest_count)
+            
