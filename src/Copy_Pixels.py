@@ -2,19 +2,24 @@ import numpy as np
 
 
 class Copy_Pixels:
+    @staticmethod
     def copy_region(
-        self,
         x: int,
         y: int,
         neighborhood_radius: int,
         to_image: np.ndarray,
         from_image: np.ndarray,
     ) -> None:
-        roi_y_start = y - neighborhood_radius
-        roi_y_end = y + neighborhood_radius + 1
-        roi_x_start = x - neighborhood_radius
-        roi_x_end = x + neighborhood_radius + 1
+        height, width = to_image.shape[:2]
 
-        to_image[roi_y_start:roi_y_end, roi_x_start:roi_x_end] = from_image[
-            roi_y_start:roi_y_end, roi_x_start:roi_x_end
+        y_start = min(max(y - neighborhood_radius, 0), height)
+        y_stop = min(max(y + neighborhood_radius + 1, 0), height)
+        x_start = min(max(x - neighborhood_radius, 0), width)
+        x_stop = min(max(x + neighborhood_radius + 1, 0), width)
+
+        if y_start >= y_stop or x_start >= x_stop:
+            return  # Brush is entirely outside the image — nothing to copy.
+
+        to_image[y_start:y_stop, x_start:x_stop] = from_image[
+            y_start:y_stop, x_start:x_stop
         ]
