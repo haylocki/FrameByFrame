@@ -45,8 +45,7 @@ class Editor_Mouse_Callback:
                 self.prevX,
                 self.prevY,
                 editing_image,
-                self.brush_radius,
-                self.brush_size,
+                self.brush_radius
             )
             self.prevX, self.prevY = x, y
 

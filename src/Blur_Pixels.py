@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+BLUR_KERNEL_SIZE = 5
+
 
 class Blur_Pixels:
     @staticmethod
@@ -11,12 +13,12 @@ class Blur_Pixels:
         prev_y: int,
         left_image: np.ndarray,
         neighborhood_radius: int,
-        neighborhood_size: int,
     ) -> None:
-        Blur_Pixels.blur_region(x, y, left_image, neighborhood_radius, neighborhood_size)
         Blur_Pixels.blur_region(
-            prev_x, prev_y, left_image, neighborhood_radius, neighborhood_size
-        )
+            x, y, left_image, neighborhood_radius)
+        Blur_Pixels.blur_region(
+            prev_x, prev_y, left_image, neighborhood_radius)
+
 
     @staticmethod
     def blur_region(
@@ -24,7 +26,6 @@ class Blur_Pixels:
         center_y: int,
         left_image: np.ndarray,
         neighborhood_radius: int,
-        neighborhood_size: int,
     ) -> None:
         height, width = left_image.shape[:2]
 
@@ -34,10 +35,10 @@ class Blur_Pixels:
         x_stop = min(max(center_x + neighborhood_radius + 1, 0), width)
 
         if y_start >= y_stop or x_start >= x_stop:
-            return  # Brush is entirely outside the image — nothing to draw.
+            return
 
         roi = left_image[y_start:y_stop, x_start:x_stop]
-        blurred_roi = cv2.blur(roi, (neighborhood_size, neighborhood_size))
+        blurred_roi = cv2.GaussianBlur(roi, (BLUR_KERNEL_SIZE, BLUR_KERNEL_SIZE), 0)
 
         circular_mask = Blur_Pixels.get_circular_mask(
             center_x, center_y, neighborhood_radius, x_start, y_start, x_stop, y_stop
@@ -46,7 +47,7 @@ class Blur_Pixels:
         left_image[y_start:y_stop, x_start:x_stop] = np.where(
             circular_mask[..., None], blurred_roi, roi
         )
-        
+
     @staticmethod
     def get_circular_mask(
         center_x: int,
