@@ -8,12 +8,14 @@ import torch
 from PyQt6.QtCore import QObject, QThreadPool, pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 
+from Dialogs import Dialogs
 from Enhanced_File_Operations import Enhanced_File_Operations
 from Gui_Values import Gui_Values
 from Image_Processing import Image_Processing_Worker
 from Ssim import Ssim
 
 IDENTICAL = 1.0
+MINIMUM_REQUIRED_MEMORY_GB = 1.0
 
 
 class Enhanced_Png_Creator(QObject):
@@ -51,6 +53,14 @@ class Enhanced_Png_Creator(QObject):
     def process_images(self) -> None:
         self.completed_threads = 0
 
+        free_memory_gb = Enhanced_Png_Creator.get_free_memory_gb()
+
+        if free_memory_gb < MINIMUM_REQUIRED_MEMORY_GB:
+            Dialogs.insufficient_memory_dialog(
+                MINIMUM_REQUIRED_MEMORY_GB, free_memory_gb
+            )
+            return
+
         frame_queue: queue.Queue[int] = queue.Queue()
         for image_index in range(1, self.total_images + 1):
             frame_queue.put(image_index)
@@ -59,14 +69,13 @@ class Enhanced_Png_Creator(QObject):
         gpu_workers = 1 if has_gpu else 0
         cpu_workers = self.gui_values.threads
         max_threads = gpu_workers + cpu_workers
-
         devices = ["cuda"] * gpu_workers + ["cpu"] * cpu_workers
 
         self.thread_pool.setMaxThreadCount(max_threads)
-        self.wait_for_free_memory(max_threads)
 
         self.workers = []
         for device in devices:
+            self.wait_for_free_memory(1.0)  # wait for room for just this one worker
             worker = Image_Processing_Worker(
                 frame_queue,
                 device,
@@ -107,11 +116,14 @@ class Enhanced_Png_Creator(QObject):
                 shutil.copy(prev_path, current_path)
 
     @staticmethod
-    def wait_for_free_memory(target_memory_gb: int) -> None:
+    def wait_for_free_memory(target_memory_gb: float) -> None:
         while True:
-            memory = psutil.virtual_memory()
-            free_memory_gb = memory.available / (1024**3)
-            if free_memory_gb >= target_memory_gb:
+            if Enhanced_Png_Creator.get_free_memory_gb() >= target_memory_gb:
                 break
 
             time.sleep(1)  # Wait for 1 second before checking again
+
+    @staticmethod
+    def get_free_memory_gb() -> float:
+        memory = psutil.virtual_memory()
+        return memory.available / (1024**3)

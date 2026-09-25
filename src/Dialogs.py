@@ -37,3 +37,16 @@ class Dialogs:
             QMessageBox.StandardButton.No,
         )
         return reply == QMessageBox.StandardButton.Yes
+
+    @staticmethod
+    def insufficient_memory_dialog(required_gb: float, available_gb: float) -> None:
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Insufficient Memory")
+        msg_box.setText(
+            f"At least {required_gb:.0f} GB of free RAM is required to start "
+            f"processing, but only {available_gb:.2f} GB is currently available. "
+            f"Please close other applications and try again."
+        )
+        msg_box.setIcon(QMessageBox.Icon.Warning)
+        msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+        msg_box.exec()
