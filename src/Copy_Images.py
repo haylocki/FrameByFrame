@@ -1,12 +1,12 @@
-from Copy_Images_File_Operations import Copy_Images_File_Operations
 from Mask import Mask
+from Mask_Copy_Operations import Mask_Copy_Operations
 from Ssim import Ssim
 
 FORWARD = 1
 BACKWARDS = -1
 
 
-class Copy_Images(Copy_Images_File_Operations):
+class Copy_Images(Mask_Copy_Operations):
     def custom_range(self, start, end):
         step = 1 if start <= end else -1
         current = start

@@ -10,9 +10,3 @@ class Blending:
         blended_image = cv2.addWeighted(editing_image, 1 - alpha, mask_image, alpha, 0)
 
         return blended_image
-
-    def blend_images(self, image_1, image_2, image_mask) -> np.ndarray:
-
-        blended_image = np.where((image_mask == [0, 0, 0]), image_1, image_2)
-
-        return blended_image

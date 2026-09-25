@@ -14,11 +14,8 @@ class Blur_Pixels:
         left_image: np.ndarray,
         neighborhood_radius: int,
     ) -> None:
-        Blur_Pixels.blur_region(
-            x, y, left_image, neighborhood_radius)
-        Blur_Pixels.blur_region(
-            prev_x, prev_y, left_image, neighborhood_radius)
-
+        Blur_Pixels.blur_region(x, y, left_image, neighborhood_radius)
+        Blur_Pixels.blur_region(prev_x, prev_y, left_image, neighborhood_radius)
 
     @staticmethod
     def blur_region(
