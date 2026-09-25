@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from __future__ import annotations
+
 from collections import OrderedDict
 from typing import Literal
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 ####################
 # Basic blocks
@@ -25,9 +23,7 @@ def act(act_type: str, inplace=True, neg_slope=0.2, n_prelu=1):
     elif act_type == "prelu":
         layer = nn.PReLU(num_parameters=n_prelu, init=neg_slope)
     else:
-        raise NotImplementedError(
-            "activation layer [{:s}] is not found".format(act_type)
-        )
+        raise NotImplementedError(f"activation layer [{act_type:s}] is not found")
     return layer
 
 
@@ -39,9 +35,7 @@ def norm(norm_type: str, nc: int):
     elif norm_type == "instance":
         layer = nn.InstanceNorm2d(nc, affine=False)
     else:
-        raise NotImplementedError(
-            "normalization layer [{:s}] is not found".format(norm_type)
-        )
+        raise NotImplementedError(f"normalization layer [{norm_type:s}] is not found")
     return layer
 
 
@@ -56,9 +50,7 @@ def pad(pad_type: str, padding):
     elif pad_type == "replicate":
         layer = nn.ReplicationPad2d(padding)
     else:
-        raise NotImplementedError(
-            "padding layer [{:s}] is not implemented".format(pad_type)
-        )
+        raise NotImplementedError(f"padding layer [{pad_type:s}] is not implemented")
     return layer
 
 
@@ -71,7 +63,7 @@ def get_valid_padding(kernel_size, dilation):
 class ConcatBlock(nn.Module):
     # Concat the output of a submodule to its input
     def __init__(self, submodule):
-        super(ConcatBlock, self).__init__()
+        super().__init__()
         self.sub = submodule
 
     def forward(self, x):
@@ -88,7 +80,7 @@ class ConcatBlock(nn.Module):
 class ShortcutBlock(nn.Module):
     # Elementwise sum the output of a submodule to its input
     def __init__(self, submodule):
-        super(ShortcutBlock, self).__init__()
+        super().__init__()
         self.sub = submodule
 
     def forward(self, x):
@@ -105,7 +97,7 @@ class ShortcutBlock(nn.Module):
 class ShortcutBlockSPSR(nn.Module):
     # Elementwise sum the output of a submodule to its input
     def __init__(self, submodule):
-        super(ShortcutBlockSPSR, self).__init__()
+        super().__init__()
         self.sub = submodule
 
     def forward(self, x):
@@ -127,8 +119,7 @@ def sequential(*args):
     modules = []
     for module in args:
         if isinstance(module, nn.Sequential):
-            for submodule in module.children():
-                modules.append(submodule)
+            modules.extend(module.children())
         elif isinstance(module, nn.Module):
             modules.append(module)
     return nn.Sequential(*modules)
@@ -155,7 +146,7 @@ def conv_block(
     mode: CNA --> Conv -> Norm -> Act
         NAC --> Norm -> Act --> Conv (Identity Mappings in Deep Residual Networks, ECCV16)
     """
-    assert mode in ("CNA", "NAC", "CNAC"), "Wrong conv mode [{:s}]".format(mode)
+    assert mode in ("CNA", "NAC", "CNAC"), f"Wrong conv mode [{mode:s}]"
     padding = get_valid_padding(kernel_size, dilation)
     p = pad(pad_type, padding) if pad_type and pad_type != "zero" else None
     padding = padding if pad_type == "zero" else 0
@@ -215,7 +206,7 @@ class ResNetBlock(nn.Module):
         mode: ConvMode = "CNA",
         res_scale=1,
     ):
-        super(ResNetBlock, self).__init__()
+        super().__init__()
         conv0 = conv_block(
             in_nc,
             mid_nc,
@@ -282,7 +273,7 @@ class RRDB(nn.Module):
         _spectral_norm=False,
         plus=False,
     ):
-        super(RRDB, self).__init__()
+        super().__init__()
         self.RDB1 = ResidualDenseBlock_5C(
             nf,
             kernel_size,
@@ -361,7 +352,7 @@ class ResidualDenseBlock_5C(nn.Module):
         mode: ConvMode = "CNA",
         plus=False,
     ):
-        super(ResidualDenseBlock_5C, self).__init__()
+        super().__init__()
 
         ## +
         self.conv1x1 = conv1x1(nf, gc) if plus else None

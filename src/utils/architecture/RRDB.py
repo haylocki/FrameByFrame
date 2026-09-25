@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import functools
 import math
 import re
@@ -9,6 +7,7 @@ import torch
 from torch import nn
 
 import utils.architecture.block as B
+from utils.architecture.block import ConvMode
 
 
 # Borrowed from https://github.com/rlaphoenix/VSGAN/blob/master/vsgan/archs/ESRGAN.py
@@ -20,7 +19,7 @@ class RRDBNet(nn.Module):
         norm=None,
         act: str = "leakyrelu",
         upsampler: str = "upconv",
-        mode: str = "CNA",
+        mode: ConvMode = "CNA",
     ) -> None:
         """
         ESRGAN - Enhanced Super-Resolution Generative Adversarial Networks.
@@ -37,7 +36,7 @@ class RRDBNet(nn.Module):
             upsampler: Upsample layer. upconv, pixel_shuffle
             mode: Convolution mode
         """
-        super(RRDBNet, self).__init__()
+        super().__init__()
 
         self.state = state_dict
         self.norm = norm
@@ -69,7 +68,7 @@ class RRDBNet(nn.Module):
             self.state = self.state["params_ema"]
         self.num_blocks = self.get_num_blocks()
 
-        self.plus = any("conv1x1" in k for k in self.state.keys())
+        self.plus = any("conv1x1" in k for k in self.state)
 
         self.state = self.new_to_old_arch(self.state)
 
@@ -83,9 +82,9 @@ class RRDBNet(nn.Module):
 
         self.num_filters = self.state[self.key_arr[0]].shape[0]
 
-        c2x2 = False
+        #c2x2 = False
         if self.state["model.0.weight"].shape[-2] == 2:
-            c2x2 = True
+            #c2x2 = True
             self.scale = math.ceil(self.scale ** (1.0 / 3))
 
         # Detect if pixelunshuffle was used (Real-ESRGAN)
@@ -120,7 +119,7 @@ class RRDBNet(nn.Module):
                     act_type=self.act,
                     #c2x2=c2x2,
                 )
-                for _ in range(int(math.log(self.scale, 2)))
+                for _ in range(int(math.log2(self.scale)))
             ]
 
         self.model = B.sequential(

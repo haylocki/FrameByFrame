@@ -15,11 +15,21 @@ class Image:
             (MINIMUM_IMAGE_SIZE, MINIMUM_IMAGE_SIZE, 3), dtype=np.uint8
         )
 
-    def load(self, image_counter: int, image_dir: str):
-        try:
-            self.picture = cv2.imread(f"{image_dir}{image_counter:06d}.png")
-        except cv2.error as e:
-            print(f"Error loading image {image_counter}: {e}")
+    def load(self, image_counter: int, image_dir: str) -> None:
+        picture = cv2.imread(f"{image_dir}{image_counter:06d}.png")
+
+        if picture is None:
+            print(
+                f"Error loading image {image_counter}: file not found or "
+                f"unreadable, falling back to previous frame"
+            )
+            if image_counter > 0:
+                self.load(image_counter - 1, image_dir)
+            else:
+                print("Frame 0 could not be loaded either — no fallback available.")
+            return
+
+        self.picture = picture
 
     def save(self, image_counter: int, image_dir: str):
         try:

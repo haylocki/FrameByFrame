@@ -345,7 +345,7 @@ class Ui(QtWidgets.QMainWindow):
             self.next_image.picture,
             screen.size(),
         ):
-            self.copy_images.backup.create_backup_frame(
+            self.copy_images.backup.create_frame(
                 self.image_counter, self.image_dir, self.backup_dir
             )
             self.editing_image.save(self.image_counter, self.image_dir)
