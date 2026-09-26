@@ -3,6 +3,7 @@ import queue
 import shutil
 import time
 
+import cv2
 import psutil
 import torch
 from PyQt6.QtCore import QObject, QThreadPool, pyqtSignal
@@ -15,7 +16,10 @@ from Image_Processing import Image_Processing_Worker
 from Ssim import Ssim
 
 IDENTICAL = 1.0
-MINIMUM_REQUIRED_MEMORY_GB = 1.0
+BYTES_PER_PIXEL_ESTIMATE = (
+    4  # accounts for float32 tensor overhead during scaling, not just raw uint8 storage
+)
+SAFETY_FACTOR = 1.5  # headroom for OS, other apps, and imprecision in the estimate
 
 
 class Enhanced_Png_Creator(QObject):
@@ -48,17 +52,30 @@ class Enhanced_Png_Creator(QObject):
         self.enhanced_directory = Enhanced_File_Operations(self.enhanced_dir)
         self.enhanced_directory.remove(window)
         self.enhanced_directory.create()
+        self.frame_width, self.frame_height = Enhanced_Png_Creator.get_frame_dimensions(
+            image_dir
+        )
+
+        self.required_memory = Enhanced_Png_Creator.estimate_memory_per_worker_gb(
+            self.frame_width, self.frame_height
+        )
         self.process_images()
 
     def process_images(self) -> None:
         self.completed_threads = 0
 
+        frame_width, frame_height = Enhanced_Png_Creator.get_frame_dimensions(
+            self.image_dir
+        )
+
+        required_memory = Enhanced_Png_Creator.estimate_memory_per_worker_gb(
+            frame_width, frame_height
+        )
+
         free_memory_gb = Enhanced_Png_Creator.get_free_memory_gb()
 
-        if free_memory_gb < MINIMUM_REQUIRED_MEMORY_GB:
-            Dialogs.insufficient_memory_dialog(
-                MINIMUM_REQUIRED_MEMORY_GB, free_memory_gb
-            )
+        if free_memory_gb < required_memory:
+            Dialogs.insufficient_memory_dialog(required_memory, free_memory_gb)
             return
 
         frame_queue: queue.Queue[int] = queue.Queue()
@@ -75,7 +92,9 @@ class Enhanced_Png_Creator(QObject):
 
         self.workers = []
         for device in devices:
-            self.wait_for_free_memory(1.0)  # wait for room for just this one worker
+            Enhanced_Png_Creator.wait_for_free_memory(
+                1.0
+            )  # wait for room for just this one worker
             worker = Image_Processing_Worker(
                 frame_queue,
                 device,
@@ -127,3 +146,17 @@ class Enhanced_Png_Creator(QObject):
     def get_free_memory_gb() -> float:
         memory = psutil.virtual_memory()
         return memory.available / (1024**3)
+
+    @staticmethod
+    def get_frame_dimensions(image_dir: str) -> tuple[int, int]:
+        first_frame_path = f"{image_dir}000001.png"
+        frame = cv2.imread(first_frame_path)
+        if frame is None:
+            raise ValueError(f"Could not read first frame at {first_frame_path}")
+        height, width = frame.shape[:2]
+        return width, height
+
+    @staticmethod
+    def estimate_memory_per_worker_gb(frame_width: int, frame_height: int) -> float:
+        raw_bytes = frame_width * frame_height * 3 * BYTES_PER_PIXEL_ESTIMATE
+        return (raw_bytes / (1024**3)) * SAFETY_FACTOR
