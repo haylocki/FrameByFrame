@@ -1,4 +1,5 @@
 import os
+import time
 
 import cv2
 import numpy as np
@@ -15,6 +16,7 @@ class Model_Pth:
         self.single_scale = False
         self.required_scale = 4
         self.model: torch.nn.Module
+        self.working_tile_size: int | None = None
 
     def set_scaling_model(
         self,
@@ -44,9 +46,61 @@ class Model_Pth:
         else:
             self.device = "cpu"
 
+    def time_tile_size(
+        self,
+        sample_image,
+        tile_size: int,
+    ) -> float | None:
+        print(
+            f"[{self.device}] Starting predict for tile {tile_size}",
+            flush=True,
+        )
+
+        try:
+            start = time.perf_counter()
+
+            self.predict(
+                sample_image,
+                patches_size=tile_size,
+            )
+
+            elapsed = time.perf_counter() - start
+
+            print(
+                f"[{self.device}] Tile size {tile_size}: {elapsed:.3f}s",
+                flush=True,
+            )
+
+            return elapsed
+
+        except torch.cuda.OutOfMemoryError:
+            torch.cuda.empty_cache()
+            print(
+                f"[{self.device}] Tile size {tile_size} FAILED: {torch.cuda.empty_cache()}",
+                flush=True,
+            )
+            return None
+
+    def find_fastest_tile_size(
+        self, sample_image: np.ndarray, candidate_sizes=(96, 128, 192, 256, 312)
+    ) -> int:
+        best_size = candidate_sizes[0]
+        best_time = float("inf")
+
+        for size in candidate_sizes:
+            elapsed = self.time_tile_size(sample_image, size)
+            if elapsed is not None and elapsed < best_time:
+                best_time = elapsed
+                best_size = size
+
+        self.working_tile_size = best_size
+        print(f"Selected fastest GPU tile size: {best_size}")
+        return best_size
+
     def scale_image(self, image: np.ndarray) -> np.ndarray:
         try:
-            image = self.predict(image)
+            tile_size = self.working_tile_size or 192
+            image = self.predict(image, patches_size=tile_size)
         except RuntimeError as error:
             print("Error", error)
 
@@ -72,9 +126,10 @@ class Model_Pth:
             .detach()
         )
         with torch.no_grad():
-            res = self.model(img[0:batch_size])
-            for i in range(batch_size, img.shape[0], batch_size):
-                res = torch.cat((res, self.model(img[i : i + batch_size])), 0)
+            results = []
+            for i in range(0, img.shape[0], batch_size):
+                results.append(self.model(img[i : i + batch_size]))
+            res = torch.cat(results, dim=0)
 
         sr_image = res.permute((0, 2, 3, 1)).clamp_(0, 1).cpu()
         np_sr_image = sr_image.numpy()

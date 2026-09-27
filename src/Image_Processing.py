@@ -1,16 +1,31 @@
 import os
 import queue
 
+import cv2
 from PyQt6.QtCore import QObject, QRunnable, pyqtSignal
 
 from Image import Image
 from Model_Pb import Model_Pb
 from Model_Rrdbnet_Pth import Model_Rrdbnet_Pth
 from Model_SRVGGNetCompact_Pth import Model_SRVGGNetCompact_Pth
+from Tile_Benchmark_Coordinator import Tile_Benchmark_Coordinator
 
 IDENTICAL = 1.0
 MULTIPLE_SCALES = False
 SINGLE_SCALE = True
+CANDIDATE_TILE_SIZES = (96, 128, 192, 256, 312)
+
+
+def get_candidate_sizes_for_worker(
+    worker_index: int, cpu_worker_count: int
+) -> list[int]:
+    """Split the candidate tile sizes across however many CPU workers the
+    user configured, so benchmarking never uses more cores than requested."""
+    return [
+        size
+        for i, size in enumerate(CANDIDATE_TILE_SIZES)
+        if i % cpu_worker_count == worker_index
+    ]
 
 
 class Image_Processing_Worker_Signals(QObject):
@@ -30,6 +45,9 @@ class Image_Processing_Worker(QRunnable):
         total_images,
         parent=None,
         progress_callback=None,
+        worker_index: int | None = None,
+        cpu_worker_count: int = 0,
+        tile_benchmark_coordinator: Tile_Benchmark_Coordinator | None = None,
     ):
         super().__init__()
         self.signals = Image_Processing_Worker_Signals()
@@ -43,6 +61,9 @@ class Image_Processing_Worker(QRunnable):
         self.total_images = total_images
         self.parent = parent
         self.progress_callback = progress_callback
+        self.worker_index = worker_index
+        self.cpu_worker_count = cpu_worker_count
+        self.tile_benchmark_coordinator = tile_benchmark_coordinator
 
     def count_files(self, directory: str) -> int:
         count = 0
@@ -102,6 +123,7 @@ class Image_Processing_Worker(QRunnable):
         return True
 
     def run(self):
+
         assert self.progress_callback is not None
         assert self.parent is not None
 
@@ -132,6 +154,32 @@ class Image_Processing_Worker(QRunnable):
             self.setup_model(Model_Rrdbnet_Pth(), SINGLE_SCALE)
 
         self.image = Image(None, None)
+
+        if self.gui_values.scaling != "None" and isinstance(
+            self.scale_model, (Model_Rrdbnet_Pth, Model_SRVGGNetCompact_Pth)
+        ):
+            sample_image = cv2.imread(f"{self.image_dir}000001.png")
+            if sample_image is not None:
+                if self.device == "cuda":
+                    self.scale_model.find_fastest_tile_size(sample_image)
+                elif self.tile_benchmark_coordinator is not None:
+                    assert self.worker_index is not None
+                    candidate_sizes = get_candidate_sizes_for_worker(
+                        self.worker_index, self.cpu_worker_count
+                    )
+
+                    for size in candidate_sizes:
+                        elapsed = self.scale_model.time_tile_size(sample_image, size)
+
+                        if elapsed is not None:
+                            self.tile_benchmark_coordinator.report(size, elapsed)
+
+                    winning_size = self.tile_benchmark_coordinator.wait_and_get_winner()
+
+                    self.scale_model.working_tile_size = winning_size
+
+                    if self.worker_index == 0:
+                        print(f"Selected fastest CPU tile size: {winning_size}")
 
         while True:
             try:

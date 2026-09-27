@@ -2,6 +2,7 @@ import os
 import queue
 import shutil
 import time
+from datetime import datetime, timezone
 
 import cv2
 import psutil
@@ -12,8 +13,9 @@ from PyQt6.QtWidgets import QMainWindow
 from Dialogs import Dialogs
 from Enhanced_File_Operations import Enhanced_File_Operations
 from Gui_Values import Gui_Values
-from Image_Processing import Image_Processing_Worker
+from Image_Processing import CANDIDATE_TILE_SIZES, Image_Processing_Worker
 from Ssim import Ssim
+from Tile_Benchmark_Coordinator import Tile_Benchmark_Coordinator
 
 IDENTICAL = 1.0
 BYTES_PER_PIXEL_ESTIMATE = (
@@ -59,6 +61,8 @@ class Enhanced_Png_Creator(QObject):
         self.required_memory = Enhanced_Png_Creator.estimate_memory_per_worker_gb(
             self.frame_width, self.frame_height
         )
+        self.start_time = datetime.now(tz=timezone.utc)
+        print(f"Encoding started at {self.start_time.strftime('%H:%M:%S')}")
         self.process_images()
 
     def process_images(self) -> None:
@@ -85,16 +89,31 @@ class Enhanced_Png_Creator(QObject):
         has_gpu = torch.cuda.is_available()
         gpu_workers = 1 if has_gpu else 0
         cpu_workers = self.gui_values.threads
+        torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
+        print(f"GUI CPU workers: {self.gui_values.threads}")
+        print(f"PyTorch CPU threads: {torch.get_num_threads()}")
+        print(f"PyTorch interop threads: {torch.get_num_interop_threads()}")
         max_threads = gpu_workers + cpu_workers
         devices = ["cuda"] * gpu_workers + ["cpu"] * cpu_workers
 
         self.thread_pool.setMaxThreadCount(max_threads)
 
+        tile_benchmark_coordinator = Tile_Benchmark_Coordinator(CANDIDATE_TILE_SIZES)
+
         self.workers = []
+        cpu_worker_index = 0
         for device in devices:
             Enhanced_Png_Creator.wait_for_free_memory(
-                1.0
+                self.required_memory
             )  # wait for room for just this one worker
+
+            if device == "cpu":
+                worker_index = cpu_worker_index
+                cpu_worker_index += 1
+            else:
+                worker_index = None
+
             worker = Image_Processing_Worker(
                 frame_queue,
                 device,
@@ -106,9 +125,13 @@ class Enhanced_Png_Creator(QObject):
                 self.total_images,
                 self,
                 self.progress_callback,
+                worker_index=worker_index,
+                cpu_worker_count=cpu_workers,
+                tile_benchmark_coordinator=tile_benchmark_coordinator,
             )
             worker.signals.finished.connect(self.check_processing_completion)
             self.workers.append(worker)
+
             self.thread_pool.start(worker)
 
     def check_processing_completion(self) -> None:
@@ -117,6 +140,10 @@ class Enhanced_Png_Creator(QObject):
         if self.completed_threads == self.thread_pool.maxThreadCount():
             self.fill_missing_frames()
             self.thread_pool.clear()
+            end_time = datetime.now(tz=timezone.utc)
+            print(f"Encoding finished at {end_time.strftime('%H:%M:%S')}")
+            print(f"Total encoding time: {end_time - self.start_time}")
+
             self.processing_finished.emit()
 
     def fill_missing_frames(self) -> None:
