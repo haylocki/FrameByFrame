@@ -129,8 +129,8 @@ class Image_Processing_Worker(QRunnable):
 
         # TensorFlow models
         if (
-            self.gui_values.scaling[:4] == "fsrc"
-            or self.gui_values.scaling[:4] == "edsr"
+            self.gui_values.scaling.startswith("fsrc")
+            or self.gui_values.scaling.startswith("edsr")
         ):
             self.scale_model = Model_Pb()
             self.scale_model.set_scaling_model(
@@ -139,17 +139,17 @@ class Image_Processing_Worker(QRunnable):
 
         # pytorch models
         elif (
-            self.gui_values.scaling[4:11] == "AnimeV3"
-            or self.gui_values.scaling[:4] == "rybu"
+            self.gui_values.scaling.startswith("RealAnimeV3")
+            or self.gui_values.scaling.startswith("rybu")
         ):
             self.setup_model(Model_SRVGGNetCompact_Pth(), SINGLE_SCALE)
 
-        elif self.gui_values.scaling[4:10] == "ESRGAN":
+        elif self.gui_values.scaling.startswith("RealESRGAN"):
             self.setup_model(Model_Rrdbnet_Pth(), MULTIPLE_SCALES)
 
         elif (
-            self.gui_values.scaling[4:11] == "Anime6B"
-            or self.gui_values.scaling[:10] == "UltraSharp"
+            self.gui_values.scaling.startswith("RealAnime6B")
+            or self.gui_values.scaling.startswith("UltraSharp")
         ):
             self.setup_model(Model_Rrdbnet_Pth(), SINGLE_SCALE)
 
