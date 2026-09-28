@@ -35,8 +35,8 @@ class Model_Pth:
 
         self.set_device(device)
 
-    def set_single_scale(self, single_scale: bool):
-        self.single_scale = single_scale
+    def set_single_scale(self, is_single_scale: bool):
+        self.single_scale = is_single_scale
 
     def set_device(self, device: str | None = None):
         if device is not None:
