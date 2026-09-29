@@ -7,7 +7,7 @@ from PyQt6.QtCore import QObject, QRunnable, pyqtSignal
 from Image import Image
 from Model_Rrdbnet_Pth import Model_Rrdbnet_Pth
 from Model_SRVGGNetCompact_Pth import Model_SRVGGNetCompact_Pth
-from ScalingModelFactory import ScalingModelFactory
+from Scaling_Model_Factory import ScalingModelFactory
 from Tile_Benchmark_Coordinator import Tile_Benchmark_Coordinator
 
 IDENTICAL = 1.0

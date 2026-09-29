@@ -1,7 +1,7 @@
 from typing import Protocol
 
 
-class ConfigurableScalingModel(Protocol):
+class Configurable_Scaling_Model(Protocol):
     """Interface required by the scaling model factory."""
 
     def set_single_scale(self, is_single_scale: bool) -> None:

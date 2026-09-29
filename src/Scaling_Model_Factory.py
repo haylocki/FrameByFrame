@@ -1,6 +1,6 @@
 from typing import Any
 
-from ConfigurableScalingModel import ConfigurableScalingModel
+from Configurable_Scaling_Model import Configurable_Scaling_Model
 from Model_Pb import Model_Pb
 from Model_Rrdbnet_Pth import Model_Rrdbnet_Pth
 from Model_SRVGGNetCompact_Pth import Model_SRVGGNetCompact_Pth
@@ -9,7 +9,7 @@ MULTIPLE_SCALES = False
 SINGLE_SCALE = True
 
 
-class ScalingModelFactory:
+class Scaling_Model_Factory:
     """Create the appropriate image scaling model for a scaling method."""
 
     @staticmethod
@@ -48,7 +48,7 @@ class ScalingModelFactory:
         else:
             raise ValueError(f"Unknown scaling method: {scaling}")
 
-        ScalingModelFactory.setup_model(
+        Scaling_Model_Factory.setup_model(
             model,
             is_single_scale,
             scaling,
@@ -60,7 +60,7 @@ class ScalingModelFactory:
 
     @staticmethod
     def setup_model(
-        model: ConfigurableScalingModel,
+        model: Configurable_Scaling_Model,
         single_scale: bool,
         scaling: str,
         current_dir: str,
