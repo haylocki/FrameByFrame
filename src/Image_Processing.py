@@ -11,8 +11,6 @@ from ScalingModelFactory import ScalingModelFactory
 from Tile_Benchmark_Coordinator import Tile_Benchmark_Coordinator
 
 IDENTICAL = 1.0
-MULTIPLE_SCALES = False
-SINGLE_SCALE = True
 CANDIDATE_TILE_SIZES = (96, 128, 192, 256, 312)
 
 
@@ -64,23 +62,7 @@ class Image_Processing_Worker(QRunnable):
         self.worker_index = worker_index
         self.cpu_worker_count = cpu_worker_count
         self.tile_benchmark_coordinator = tile_benchmark_coordinator
-
-    def count_files(self, directory: str) -> int:
-        count = 0
-        with os.scandir(directory) as entries:
-            for entry in entries:
-                if entry.is_file():
-                    count += 1
-
-        return count
-
-    def setup_model(self, model, single_scale: bool) -> None:
-        self.scale_model = model
-        self.scale_model.set_single_scale(single_scale)
-        self.scale_model.set_scaling_model(
-            self.gui_values.scaling, self.current_dir, self.device
-        )
-        self.scale_model.create_model()
+        self.scale_model = None
 
     def process_frame(self, frame_index: int) -> bool:
         assert self.progress_callback is not None
@@ -109,6 +91,7 @@ class Image_Processing_Worker(QRunnable):
                     self.image.white_balance()
 
                 if self.gui_values.scaling != "None":
+                    assert self.scale_model is not None
                     self.image.picture = self.scale_model.scale_image(
                         self.image.picture
                     )
@@ -128,38 +111,17 @@ class Image_Processing_Worker(QRunnable):
         assert self.parent is not None
 
         # TensorFlow models
+        self.image = Image(None, None)
+
         if self.gui_values.scaling != "None":
-            self.scale_model, self.is_single_scale = ScalingModelFactory.load_model(
+            self.scale_model, _ = ScalingModelFactory.load_model(
                 self.gui_values.scaling, self.current_dir, self.device
             )
 
-        self.image = Image(None, None)
-
-        if self.gui_values.scaling != "None" and isinstance(
-            self.scale_model, (Model_Rrdbnet_Pth, Model_SRVGGNetCompact_Pth)
-        ):
-            sample_image = cv2.imread(f"{self.image_dir}000001.png")
-            if sample_image is not None:
-                if self.device == "cuda":
-                    self.scale_model.find_fastest_tile_size(sample_image)
-                elif self.tile_benchmark_coordinator is not None:
-                    assert self.worker_index is not None
-                    candidate_sizes = get_candidate_sizes_for_worker(
-                        self.worker_index, self.cpu_worker_count
-                    )
-
-                    for size in candidate_sizes:
-                        elapsed = self.scale_model.time_tile_size(sample_image, size)
-
-                        if elapsed is not None:
-                            self.tile_benchmark_coordinator.report(size, elapsed)
-
-                    winning_size = self.tile_benchmark_coordinator.wait_and_get_winner()
-
-                    self.scale_model.working_tile_size = winning_size
-
-                    if self.worker_index == 0:
-                        print(f"Selected fastest CPU tile size: {winning_size}")
+            if isinstance(
+                self.scale_model, (Model_Rrdbnet_Pth, Model_SRVGGNetCompact_Pth)
+            ):
+                self.benchmark_tile_size()
 
         while True:
             try:
@@ -171,3 +133,35 @@ class Image_Processing_Worker(QRunnable):
                 return
 
         self.signals.finished.emit()
+
+    def benchmark_tile_size(self) -> None:
+        assert self.scale_model is not None
+        sample_image = cv2.imread(f"{self.image_dir}000001.png")
+
+        if sample_image is None:
+            return
+
+        if self.device == "cuda":
+            self.scale_model.find_fastest_tile_size(sample_image)
+            return
+
+        if self.tile_benchmark_coordinator is None:
+            return
+
+        assert self.worker_index is not None
+
+        candidate_sizes = get_candidate_sizes_for_worker(
+            self.worker_index, self.cpu_worker_count
+        )
+
+        for size in candidate_sizes:
+            elapsed = self.scale_model.time_tile_size(sample_image, size)
+
+            if elapsed is not None:
+                self.tile_benchmark_coordinator.report(size, elapsed)
+
+        winning_size = self.tile_benchmark_coordinator.wait_and_get_winner()
+        self.scale_model.working_tile_size = winning_size
+
+        if self.worker_index == 0:
+            print(f"Selected fastest CPU tile size: {winning_size}")
