@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from Circular_Brush import Circular_Brush
+
 BLUR_KERNEL_SIZE = 5
 
 
@@ -26,37 +28,20 @@ class Blur_Pixels:
     ) -> None:
         height, width = left_image.shape[:2]
 
-        y_start = min(max(center_y - neighborhood_radius, 0), height)
-        y_stop = min(max(center_y + neighborhood_radius + 1, 0), height)
-        x_start = min(max(center_x - neighborhood_radius, 0), width)
-        x_stop = min(max(center_x + neighborhood_radius + 1, 0), width)
+        x_start, y_start, x_stop, y_stop = Circular_Brush.get_bounds(
+            center_x, center_y, neighborhood_radius, width, height
+        )
 
         if y_start >= y_stop or x_start >= x_stop:
             return
-
+        
         roi = left_image[y_start:y_stop, x_start:x_stop]
         blurred_roi = cv2.GaussianBlur(roi, (BLUR_KERNEL_SIZE, BLUR_KERNEL_SIZE), 0)
 
-        circular_mask = Blur_Pixels.get_circular_mask(
+        circular_mask = Circular_Brush.get_mask(
             center_x, center_y, neighborhood_radius, x_start, y_start, x_stop, y_stop
         )
 
         left_image[y_start:y_stop, x_start:x_stop] = np.where(
             circular_mask[..., None], blurred_roi, roi
         )
-
-    @staticmethod
-    def get_circular_mask(
-        center_x: int,
-        center_y: int,
-        radius: int,
-        x_start: int,
-        y_start: int,
-        x_stop: int,
-        y_stop: int,
-    ) -> np.ndarray:
-        actual_y = np.arange(y_start, y_stop)[:, None]
-        actual_x = np.arange(x_start, x_stop)[None, :]
-
-        distance_squared = (actual_x - center_x) ** 2 + (actual_y - center_y) ** 2
-        return distance_squared <= radius**2

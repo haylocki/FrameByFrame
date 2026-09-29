@@ -1,5 +1,7 @@
 import numpy as np
 
+from Circular_Brush import Circular_Brush
+
 
 class Copy_Pixels:
     @staticmethod
@@ -12,14 +14,28 @@ class Copy_Pixels:
     ) -> None:
         height, width = to_image.shape[:2]
 
-        y_start = min(max(y - neighborhood_radius, 0), height)
-        y_stop = min(max(y + neighborhood_radius + 1, 0), height)
-        x_start = min(max(x - neighborhood_radius, 0), width)
-        x_stop = min(max(x + neighborhood_radius + 1, 0), width)
+        x_start, y_start, x_stop, y_stop = Circular_Brush.get_bounds(
+            x, y, neighborhood_radius, width, height
+        )
 
         if y_start >= y_stop or x_start >= x_stop:
-            return  # Brush is entirely outside the image — nothing to copy.
+            return
 
-        to_image[y_start:y_stop, x_start:x_stop] = from_image[
-            y_start:y_stop, x_start:x_stop
-        ]
+        circular_mask = Circular_Brush.get_mask(
+            x,
+            y,
+            neighborhood_radius,
+            x_start,
+            y_start,
+            x_stop,
+            y_stop,
+        )
+
+        to_roi = to_image[y_start:y_stop, x_start:x_stop]
+        from_roi = from_image[y_start:y_stop, x_start:x_stop]
+
+        to_roi[:] = np.where(
+            circular_mask[..., None],
+            from_roi,
+            to_roi,
+        )
