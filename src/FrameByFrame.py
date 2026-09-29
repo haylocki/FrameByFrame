@@ -97,7 +97,6 @@ class Ui(QtWidgets.QMainWindow):
             self.crop_left_spinbox,
             self.crop_right_spinbox,
             self.action_quit,
-            self.action_image_directory,
         ]
         self.disable_buttons_list = [
             self.previous,
@@ -243,7 +242,8 @@ class Ui(QtWidgets.QMainWindow):
         self.ignore_spinbox_signals = True
         self.gui_values = self.settings.load(self.gui_values)
         self.receive_widget_values_from_class()
-        self.ssim.load(self.image_dir, self.total_images)
+        if not self.ssim.load(self.image_dir, self.total_images):
+            self.ssim.clear_values(self.total_images)
         self.ignore_spinbox_signals = False
 
     def save_settings(self) -> None:
@@ -251,15 +251,13 @@ class Ui(QtWidgets.QMainWindow):
         self.settings.save(self.gui_values)
         self.ssim.save(self.image_dir)
 
-    pyqtSlot(int)
-
+    @pyqtSlot(int)
     def update_progress_bar(self, percentage: int) -> None:
         if percentage > self.previous_percentage:
             self.previous_percentage = percentage
             self.progress_bar.setValue(percentage)
-
-    pyqtSlot()
-
+    
+    @pyqtSlot()
     def encoding_finished(self) -> None:
         self.converting = False
         self.progress_bar.setValue(0)
@@ -331,8 +329,7 @@ class Ui(QtWidgets.QMainWindow):
     def remove_scratch_pressed(self) -> None:
         self.editing_image.load(self.image_counter, self.image_dir)
         self.next_image.load(self.image_counter + 1, self.image_dir)
-        screen = QGuiApplication.primaryScreen()
-        assert screen is not None
+
         # If we are on the first frame, we cannot copy from the previous frame
         if self.image_counter > 2:
             self.previous_image.load(self.image_counter - 1, self.image_dir)
@@ -343,7 +340,7 @@ class Ui(QtWidgets.QMainWindow):
             self.editing_image.picture,
             self.previous_image.picture,
             self.next_image.picture,
-            screen.size(),
+            self.screen.size(),
         ):
             self.copy_images.backup.create_backup_frame(
                 self.image_counter, self.image_dir, self.backup_dir
@@ -422,13 +419,19 @@ class Ui(QtWidgets.QMainWindow):
     def resize_window(self) -> None:
         self.move(0, 0)
         self.adjustSize()
-        height, width = self.editing_image.picture.shape[:2]
-        aspect_ratio = width / height
-        width = self.screen_width / 2
-        height = int(width / aspect_ratio)
-        if height > (self.screen_height - GUI_CONTROLS_HEIGHT):
-            height = self.screen_height - GUI_CONTROLS_HEIGHT * 2
-        self.resize(self.screen_width, height + GUI_CONTROLS_HEIGHT)
+        image_height, image_width = self.editing_image.picture.shape[:2]
+        aspect_ratio = image_width / image_height
+
+        window_width = self.screen_width / 2
+        window_height = int(window_width / aspect_ratio)
+
+        if window_height > self.screen_height - GUI_CONTROLS_HEIGHT:
+            window_height = self.screen_height - GUI_CONTROLS_HEIGHT * 2
+
+        self.resize(
+            self.screen_width,
+            window_height + GUI_CONTROLS_HEIGHT,
+        )
 
     def select_video(self) -> None:
         selected_file = self.dialogs.open_file_dialog("Select Video File")
@@ -466,9 +469,6 @@ class Ui(QtWidgets.QMainWindow):
                 len(fnmatch.filter(os.listdir(self.image_dir), "*.png")) - 1
             )
 
-            if not self.ssim.load(self.image_dir, self.total_images):
-                self.ssim.clear_values(self.total_images)
-
             if self.total_images > 1:
                 self.load_images()
                 self.image_mask.create(self.editing_image, self.gui_values)
@@ -501,7 +501,7 @@ class Ui(QtWidgets.QMainWindow):
 
         if not self.scanning and not self.converting:
             for button in self.enable_buttons_list:
-                button.setEnabled(not self.scanning and not self.converting)
+                button.setEnabled(True)
 
             self.copy_to.setEnabled(self.copy_from_image > 0)
             self.next.setEnabled(self.image_counter < self.total_images)
@@ -570,7 +570,7 @@ class Ui(QtWidgets.QMainWindow):
         self.enable_buttons()
 
     def closing_down(self) -> None:
-        if self.image_dir != None:
+        if self.image_dir:
             self.save_settings()
             self.ssim.save(self.image_dir)
 
@@ -597,7 +597,7 @@ class Ui(QtWidgets.QMainWindow):
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)  # Create QApplication instance
+    app = QApplication(sys.argv)  # Create QApplication instance
     ui = Ui()  # noqa: F841
     sys.exit(app.exec())
 

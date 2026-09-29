@@ -7,7 +7,7 @@ from PyQt6.QtCore import QObject, QRunnable, pyqtSignal
 from Image import Image
 from Model_Rrdbnet_Pth import Model_Rrdbnet_Pth
 from Model_SRVGGNetCompact_Pth import Model_SRVGGNetCompact_Pth
-from Scaling_Model_Factory import ScalingModelFactory
+from Scaling_Model_Factory import Scaling_Model_Factory
 from Tile_Benchmark_Coordinator import Tile_Benchmark_Coordinator
 
 IDENTICAL = 1.0
@@ -114,7 +114,7 @@ class Image_Processing_Worker(QRunnable):
         self.image = Image(None, None)
 
         if self.gui_values.scaling != "None":
-            self.scale_model, _ = ScalingModelFactory.load_model(
+            self.scale_model, _ = Scaling_Model_Factory.load_model(
                 self.gui_values.scaling, self.current_dir, self.device
             )
 
