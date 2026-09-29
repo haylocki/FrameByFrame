@@ -3,12 +3,11 @@ import queue
 
 import cv2
 from PyQt6.QtCore import QObject, QRunnable, pyqtSignal
-from ScalingModelFactory import ScalingModelFactory
 
 from Image import Image
-from Model_Pb import Model_Pb
 from Model_Rrdbnet_Pth import Model_Rrdbnet_Pth
 from Model_SRVGGNetCompact_Pth import Model_SRVGGNetCompact_Pth
+from ScalingModelFactory import ScalingModelFactory
 from Tile_Benchmark_Coordinator import Tile_Benchmark_Coordinator
 
 IDENTICAL = 1.0
@@ -129,28 +128,10 @@ class Image_Processing_Worker(QRunnable):
         assert self.parent is not None
 
         # TensorFlow models
-        if (
-            self.gui_values.scaling.startswith("fsrc")
-            or self.gui_values.scaling.startswith("edsr")
-        ):
-            self.scale_model = Model_Pb()
+        if self.gui_values.scaling != "None":
             self.scale_model, self.is_single_scale = ScalingModelFactory.load_model(
                 self.gui_values.scaling, self.current_dir, self.device
             )
-
-        # pytorch models
-        elif (
-            self.gui_values.scaling.startswith(("RealAnimeV3","rybu"))
-        ):
-            self.setup_model(Model_SRVGGNetCompact_Pth(), SINGLE_SCALE)
-
-        elif self.gui_values.scaling.startswith("RealESRGAN"):
-            self.setup_model(Model_Rrdbnet_Pth(), MULTIPLE_SCALES)
-
-        elif (
-            self.gui_values.scaling.startswith(("RealAnime6B","UltraSharp"))
-        ):
-            self.setup_model(Model_Rrdbnet_Pth(), SINGLE_SCALE)
 
         self.image = Image(None, None)
 

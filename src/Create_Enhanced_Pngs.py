@@ -22,6 +22,7 @@ BYTES_PER_PIXEL_ESTIMATE = (
     4  # accounts for float32 tensor overhead during scaling, not just raw uint8 storage
 )
 SAFETY_FACTOR = 1.5  # headroom for OS, other apps, and imprecision in the estimate
+OPEN_CV_MODELS = ("fsrc", "edsr")
 
 
 class Enhanced_Png_Creator(QObject):
@@ -86,11 +87,15 @@ class Enhanced_Png_Creator(QObject):
         for image_index in range(1, self.total_images + 1):
             frame_queue.put(image_index)
 
-        has_gpu = torch.cuda.is_available()
-        gpu_workers = 1 if has_gpu else 0
-        cpu_workers = self.gui_values.threads
+        is_opencv_model = self.gui_values.scaling.startswith(OPEN_CV_MODELS)
+        gpu_workers = int(torch.cuda.is_available() and not is_opencv_model)
+        cpu_workers = 1 if is_opencv_model else self.gui_values.threads
+
         torch.set_num_threads(1)
         torch.set_num_interop_threads(1)
+        cv2.setNumThreads(
+            self.gui_values.threads if is_opencv_model else 1
+        )
         print(f"GUI CPU workers: {self.gui_values.threads}")
         print(f"PyTorch CPU threads: {torch.get_num_threads()}")
         print(f"PyTorch interop threads: {torch.get_num_interop_threads()}")
@@ -142,7 +147,7 @@ class Enhanced_Png_Creator(QObject):
             self.thread_pool.clear()
             end_time = datetime.now(tz=timezone.utc)
             print(f"Encoding finished at {end_time.strftime('%H:%M:%S')}")
-            print(f"Total encoding time: {end_time - self.start_time}")
+            print(f"Total encoding time: {end_time - self.start_time}")  # type: ignore
 
             self.processing_finished.emit()
 
