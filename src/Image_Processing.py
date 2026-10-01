@@ -37,6 +37,7 @@ class Image_Processing_Worker(QRunnable):
         device,
         enhanced_dir,
         gui_values,
+        scene_parameters,
         ssim,
         image_dir,
         current_dir,
@@ -52,6 +53,7 @@ class Image_Processing_Worker(QRunnable):
         self.frame_queue = frame_queue
         self.device = device
         self.gui_values = gui_values
+        self.scene_parameters = scene_parameters
         self.current_dir = current_dir
         self.image_dir = image_dir
         self.enhanced_dir = enhanced_dir
@@ -68,24 +70,30 @@ class Image_Processing_Worker(QRunnable):
         assert self.progress_callback is not None
         assert self.parent is not None
 
-        white_balance = self.gui_values.white_balance
-        enable_enhancement = self.gui_values.enable_enhancement
+        scene_gui_values = self.scene_parameters.for_frame(frame_index)
+        white_balance = scene_gui_values.white_balance
+        enable_enhancement = scene_gui_values.enable_enhancement
 
         frames_remaining = self.frame_queue.qsize()
         frames_attempted = self.total_images - frames_remaining
         progress_percentage = (frames_attempted * 50) // self.total_images
         self.progress_callback.emit(progress_percentage)
 
+        same_scene_as_previous = self.scene_parameters.for_frame(
+            frame_index
+        ) is self.scene_parameters.for_frame(frame_index - 1)
+
         try:
-            if (
-                not os.path.isfile(f"{self.enhanced_dir}{frame_index:06d}.png")
-                and self.ssim.get(frame_index - 1) != IDENTICAL
+            if not os.path.isfile(
+                f"{self.enhanced_dir}{frame_index:06d}.png"
+            ) and not (
+                self.ssim.get(frame_index - 1) == IDENTICAL and same_scene_as_previous
             ):
                 self.image.load(frame_index, self.image_dir)
-                self.image.crop(self.gui_values)
+                self.image.crop(scene_gui_values)
 
                 if enable_enhancement:
-                    self.image.colour_enhance(self.gui_values)
+                    self.image.colour_enhance(scene_gui_values)
 
                 if white_balance:
                     self.image.white_balance()

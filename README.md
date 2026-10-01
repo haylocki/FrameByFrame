@@ -133,11 +133,17 @@ Then select the video you are working on. This will convert the images back into
 **Copy To:** Copies the frame selected with **"Copy From"** over all frames up to and including the frame displayed in the left of the window
 
 ### Picture enhancement controls:
-**Scaling:** Use this to select the scaling method you want applied to the video
+**Scaling:** Use this to select the scaling method you want applied to the video. This setting applies to the whole video and is not scene-specific.
 
-**White Balance:** Selects whether or not to apply white balance to the video
+**White Balance:** Selects whether or not to apply white balance to the video (Scene specific).
 
-**Enhance Colour:** When selected allows you to alter contrast and brightness of the video
+**Enhance Colour:** When selected allows you to alter contrast and brightness of the video (Scene specific).
+
+**Scenes:** Picture enhancement settings (White Balance, Enhance Colour, Contrast, Brightness, Compress, Theta, Phi) are set on a scene-by-scene basis, not globally. A scene marks the frame where a new set of enhancement settings begins, applying from that frame onward until the next scene (or the end of the video). Frame 1 always has a default scene that cannot be removed, so the video always has a starting set of enhancement settings.
+
+These controls are greyed out and cannot be changed unless you are viewing frame 1, or a frame where a scene has been added. Use the Add Scene button to create a new scene at the currently viewed frame (capturing whatever settings are currently active).
+Use the Del Scene button to remove an existing scene.
+Scene markers are shown as red ticks on the frame scrubber.
 
 ### Encoder Controls:
 **Preset:** Sets the ffmpeg x265 optimising preset
@@ -146,7 +152,11 @@ Then select the video you are working on. This will convert the images back into
 
 **CRF:** Sets the ffmpeg x265 constant rate factor
 
-**Threads:** The number of simultaneouly generated frames. Be aware CPU generated Frames take much longer than GPU generated frames. Set threads to 1 for GPU generated frames only.
+**Threads:** For most scaling models, this is the number of CPU workers generating separate frames in parallel. If a compatible GPU is available, one additional GPU worker always runs alongside the CPU workers, regardless of this setting — the GPU worker is not counted here. Set this to 0 to use the GPU only, with no CPU workers running at all. If no compatible GPU is found, this value automatically falls back to a minimum of 1.
+
+For the fsrcnn and edsr scaling models, Threads instead controls how many CPU threads work together to generate each individual frame — only one frame is processed at a time, using that many threads internally, rather than multiple frames being generated in parallel.
+
+Be aware that CPU-generated frames take significantly longer than GPU-generated frames, so increasing this number won't proportionally speed up encoding for most models — most frames will typically be completed by the GPU worker when one is available.
 
 **Crop Top:** Allows you to crop the top of the video
 

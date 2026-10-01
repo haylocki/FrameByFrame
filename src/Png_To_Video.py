@@ -8,6 +8,7 @@ from Create_Enhanced_Pngs import Enhanced_Png_Creator as cep
 from Dialogs import Dialogs
 from Ffmpeg_Utils import Ffmpeg_Utils
 from Gui_Values import Gui_Values
+from Scene_Parameters import Scene_Parameters
 from Ssim import Ssim
 
 
@@ -27,6 +28,7 @@ class Png_To_Video(QObject):
     def convert_png_to_video(
         self,
         gui_values: Gui_Values,
+        scene_parameters: "Scene_Parameters",
         dialogs: Dialogs,
         image_dir: str,
         current_dir: str,
@@ -51,12 +53,17 @@ class Png_To_Video(QObject):
 
             self.fps = "0.0"
             self.fps = str(video.get(cv2.CAP_PROP_FPS))
-            
             if self.fps == "0.0":
-                print ("Failed to read FPS from file")
+                print("Failed to read FPS from file")
 
             self.cep.create_enhanced_pngs(
-                gui_values, image_dir, current_dir, total_images, ssim, window
+                gui_values,
+                scene_parameters,
+                image_dir,
+                current_dir,
+                total_images,
+                ssim,
+                window,
             )
 
         return result

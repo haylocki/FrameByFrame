@@ -1,4 +1,5 @@
 # pyright: reportAttributeAccessIssue=false
+import copy
 import fnmatch
 import os
 import sys
@@ -17,6 +18,7 @@ from Gui_Values import Gui_Values
 from Image import Image
 from Mask import Mask
 from Png_To_Video import Png_To_Video
+from Scene_Parameters import Scene_Parameters
 from Scratch_Remover import Scratch_Remover
 from Settings import Settings
 from Ssim import Ssim
@@ -65,7 +67,6 @@ class Ui(QtWidgets.QMainWindow):
         self.scanning = False
         self.converting = False
         self.ignore_spinbox_signals = False
-        self.enable_enhancement = False
         self.subprocess_proc = None
         self.window_border = 10
         self.desktop = self.screen.geometry()
@@ -73,35 +74,30 @@ class Ui(QtWidgets.QMainWindow):
         self.screen_height = self.desktop.height() - self.window_border
         self.threads_spinbox.setMaximum(cpu_count())
         self.enable_buttons_list = [
-            self.enhancement_checkbox,
-            self.white_balance_checkbox,
-            self.contrast_spinbox,
-            self.brightness_spinbox,
-            self.phi_spinbox,
-            self.theta_spinbox,
-            self.compress_spinbox,
             self.mask_button,
             self.previous,
             self.image_slider,
             self.remove_scratch,
+            self.scene_button,
             self.action_convert_from_video,
             self.action_convert_to_video,
             self.preset_combo_box,
             self.chroma_combo_box,
             self.crf_spinbox,
             self.threads_spinbox,
-            self.scaling_combo_box,
             self.action_image_directory,
             self.crop_top_spinbox,
             self.crop_bottom_spinbox,
             self.crop_left_spinbox,
             self.crop_right_spinbox,
             self.action_quit,
+            self.scaling_combo_box,
         ]
         self.disable_buttons_list = [
             self.previous,
             self.copy,
             self.undo_button,
+            self.scene_button,
             self.next,
             self.mask_button,
             self.image_slider,
@@ -162,12 +158,12 @@ class Ui(QtWidgets.QMainWindow):
         self.copy_from.clicked.connect(self.copy_from_pressed)
         self.copy_to.clicked.connect(self.copy_to_pressed)
         self.mask_button.clicked.connect(self.mask_pressed)
+        self.scene_button.clicked.connect(self.scene_button_pressed)
         self.undo_button.clicked.connect(self.undo_pressed)
         self.remove_scratch.clicked.connect(self.remove_scratch_pressed)
         self.scan.clicked.connect(self.scan_images)
-        self.enhancement_checkbox.stateChanged.connect(
-            self.enhancement_checkbox_clicked
-        )
+        self.scaling_combo_box.currentIndexChanged.connect(self.scale_spinbox_changed)
+        self.enhancement_checkbox.stateChanged.connect(self.load_images)
         self.crop_top_spinbox.valueChanged.connect(
             lambda value: self.crop_spinbox(
                 self.crop_top_spinbox,
@@ -244,19 +240,27 @@ class Ui(QtWidgets.QMainWindow):
         self.receive_widget_values_from_class()
         if not self.ssim.load(self.image_dir, self.total_images):
             self.ssim.clear_values(self.total_images)
+
+        self.scene_parameters = Scene_Parameters.load(self.image_dir)
+        if not self.scene_parameters.has_scene_at(1):
+            self.scene_parameters.add_scene(1, copy.deepcopy(self.gui_values))
+
+        self.image_slider.set_markers(set(self.scene_parameters.start_frames))
+        self.update_scene_state()
         self.ignore_spinbox_signals = False
 
     def save_settings(self) -> None:
         self.pass_widget_values_to_class()
         self.settings.save(self.gui_values)
         self.ssim.save(self.image_dir)
+        self.scene_parameters.save(self.image_dir)
 
     @pyqtSlot(int)
     def update_progress_bar(self, percentage: int) -> None:
         if percentage > self.previous_percentage:
             self.previous_percentage = percentage
             self.progress_bar.setValue(percentage)
-    
+
     @pyqtSlot()
     def encoding_finished(self) -> None:
         self.converting = False
@@ -270,6 +274,7 @@ class Ui(QtWidgets.QMainWindow):
         self.disable_buttons()
         if not self.png_to_video.convert_png_to_video(
             self.gui_values,
+            self.scene_parameters,
             self.dialogs,
             self.image_dir,
             self.current_dir,
@@ -293,6 +298,10 @@ class Ui(QtWidgets.QMainWindow):
 
             self.load_images()
 
+    def scale_spinbox_changed(self) -> None:
+        self.pass_widget_values_to_class()
+        self.settings.save(self.gui_values)
+
     def spinbox_changed(self) -> None:
         if not self.ignore_spinbox_signals:
             self.load_images()
@@ -313,7 +322,7 @@ class Ui(QtWidgets.QMainWindow):
     def enhance_image(self, image: Image, image_number: int) -> None:
         image.crop(self.gui_values)
 
-        if self.enable_enhancement:
+        if self.gui_values.enable_enhancement:
             image.colour_enhance(self.gui_values)
 
         if self.gui_values.white_balance:
@@ -394,6 +403,51 @@ class Ui(QtWidgets.QMainWindow):
         self.load_images()
         self.enable_buttons()
 
+    def scene_button_pressed(self) -> None:
+        self.pass_widget_values_to_class()
+
+        if self.scene_parameters.has_scene_at(self.image_counter):
+            self.scene_parameters.remove_scene(self.image_counter)
+            self.update_scene_state()
+        else:
+            scene_gui_values = copy.deepcopy(self.gui_values)
+            self.scene_parameters.add_scene(self.image_counter, scene_gui_values)
+            self.gui_values = scene_gui_values
+
+        self.image_slider.set_markers(set(self.scene_parameters.start_frames))
+        self.update_scene_button_label()
+
+    def update_scene_button_label(self) -> None:
+        if self.image_counter == 1:
+            self.scene_button.setEnabled(False)
+            self.scene_button.setText("Add Scene")
+            self.set_enhancement_controls_enabled(True)
+            return
+
+        has_scene = self.scene_parameters.has_scene_at(self.image_counter)
+        self.scene_button.setEnabled(True)
+
+        if has_scene:
+            self.scene_button.setText("Del Scene")
+        else:
+            self.scene_button.setText("Add Scene")
+
+        self.set_enhancement_controls_enabled(has_scene)
+
+    def set_enhancement_controls_enabled(self, enabled: bool) -> None:
+        self.contrast_spinbox.setEnabled(enabled)
+        self.contrast_label.setEnabled(enabled)
+        self.brightness_spinbox.setEnabled(enabled)
+        self.brightness_label.setEnabled(enabled)
+        self.compress_spinbox.setEnabled(enabled)
+        self.compression_label.setEnabled(enabled)
+        self.theta_spinbox.setEnabled(enabled)
+        self.theta_label.setEnabled(enabled)
+        self.phi_spinbox.setEnabled(enabled)
+        self.Phi_label.setEnabled(enabled)
+        self.white_balance_checkbox.setEnabled(enabled)
+        self.enhancement_checkbox.setEnabled(enabled)
+
     def previous_pressed(self) -> None:
         self.load_previous_image()
         self.enable_buttons()
@@ -409,12 +463,22 @@ class Ui(QtWidgets.QMainWindow):
 
         return os.path.isfile(backup_filename)
 
-    def enhancement_checkbox_clicked(self) -> None:
-        self.enable_enhancement = self.enhancement_checkbox.isChecked()
-        self.load_images()
-
     def white_balance_clicked(self) -> None:
         self.load_images()
+
+    def update_scene_state(self) -> None:
+        current_scaling_index = self.gui_values.scaling_index
+
+        if self.image_counter == 1:
+            self.gui_values = self.scene_parameters.scenes[0].gui_values
+        else:
+            self.gui_values = self.scene_parameters.for_frame(self.image_counter)
+
+        self.gui_values.scaling_index = current_scaling_index
+        self.ignore_spinbox_signals = True
+        self.receive_widget_values_from_class()
+        self.ignore_spinbox_signals = False
+        self.update_scene_button_label()
 
     def resize_window(self) -> None:
         self.move(0, 0)
@@ -502,6 +566,7 @@ class Ui(QtWidgets.QMainWindow):
         if not self.scanning and not self.converting:
             for button in self.enable_buttons_list:
                 button.setEnabled(True)
+            self.update_scene_button_label()
 
             self.copy_to.setEnabled(self.copy_from_image > 0)
             self.next.setEnabled(self.image_counter < self.total_images)
@@ -546,6 +611,7 @@ class Ui(QtWidgets.QMainWindow):
     def update_image_counter(self, delta: int) -> None:
         self.loading_image = True
         self.image_counter += delta
+        self.update_scene_state()
         self.load_images()
         self.image_slider.setValue(self.image_counter)
         self.loading_image = False
@@ -562,6 +628,7 @@ class Ui(QtWidgets.QMainWindow):
         self.image_counter = value
         self.slider = True
         self.enable_buttons()
+        self.update_scene_state()
         self.load_images()
 
     def slider_released(self) -> None:

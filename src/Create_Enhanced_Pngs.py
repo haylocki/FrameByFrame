@@ -14,6 +14,7 @@ from Dialogs import Dialogs
 from Enhanced_File_Operations import Enhanced_File_Operations
 from Gui_Values import Gui_Values
 from Image_Processing import CANDIDATE_TILE_SIZES, Image_Processing_Worker
+from Scene_Parameters import Scene_Parameters
 from Ssim import Ssim
 from Tile_Benchmark_Coordinator import Tile_Benchmark_Coordinator
 
@@ -29,6 +30,7 @@ class Enhanced_Png_Creator(QObject):
     processing_finished = pyqtSignal()
     processing_error = pyqtSignal(str)
     progress_callback = pyqtSignal(int)
+    _torch_threads_configured = False
 
     def __init__(self, update_progress_callback):
         super().__init__()
@@ -38,6 +40,7 @@ class Enhanced_Png_Creator(QObject):
     def create_enhanced_pngs(
         self,
         gui_values: Gui_Values,
+        scene_parameters: "Scene_Parameters",
         image_dir: str,
         current_dir: str,
         total_images: int,
@@ -45,6 +48,7 @@ class Enhanced_Png_Creator(QObject):
         window: QMainWindow,
     ) -> None:
         self.gui_values = gui_values
+        self.scene_parameters = scene_parameters
         self.ssim = ssim
         self.image_dir = image_dir
         self.current_dir = current_dir
@@ -89,16 +93,20 @@ class Enhanced_Png_Creator(QObject):
 
         is_opencv_model = self.gui_values.scaling.startswith(OPEN_CV_MODELS)
         gpu_workers = int(torch.cuda.is_available() and not is_opencv_model)
+
+        if not gpu_workers and not self.gui_values.threads:
+            self.gui_values.threads = 1
+
         cpu_workers = 1 if is_opencv_model else self.gui_values.threads
 
-        torch.set_num_threads(1)
-        torch.set_num_interop_threads(1)
-        cv2.setNumThreads(
-            self.gui_values.threads if is_opencv_model else 1
-        )
-        print(f"GUI CPU workers: {self.gui_values.threads}")
-        print(f"PyTorch CPU threads: {torch.get_num_threads()}")
-        print(f"PyTorch interop threads: {torch.get_num_interop_threads()}")
+        if not Enhanced_Png_Creator._torch_threads_configured:
+            torch.set_num_threads(1)
+            torch.set_num_interop_threads(1)
+            Enhanced_Png_Creator._torch_threads_configured = True
+            cv2.setNumThreads(self.gui_values.threads if is_opencv_model else 1)
+            print(f"GUI CPU workers: {self.gui_values.threads}")
+            print(f"PyTorch CPU threads: {torch.get_num_threads()}")
+            print(f"PyTorch interop threads: {torch.get_num_interop_threads()}")
         max_threads = gpu_workers + cpu_workers
         devices = ["cuda"] * gpu_workers + ["cpu"] * cpu_workers
 
@@ -124,6 +132,7 @@ class Enhanced_Png_Creator(QObject):
                 device,
                 self.enhanced_dir,
                 self.gui_values,
+                self.scene_parameters,
                 self.ssim,
                 self.image_dir,
                 self.current_dir,
