@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QFileDialog, QMainWindow, QMessageBox
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QProgressDialog
 
 
 class Dialogs:
@@ -50,3 +51,13 @@ class Dialogs:
         msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
         msg_box.exec()
+
+    @staticmethod
+    def copying_frames_dialog(window: QMainWindow) -> QProgressDialog:
+        progress_dialog = QProgressDialog("Copying Frames", None, 0, 100, window)
+        progress_dialog.setWindowTitle("Copying Frames")
+        progress_dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        progress_dialog.setCancelButton(None)
+        progress_dialog.setMinimumDuration(0)
+        progress_dialog.show()
+        return progress_dialog

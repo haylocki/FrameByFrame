@@ -23,21 +23,22 @@ class Copy_Images(Mask_Copy_Operations):
         copy_to_image: int,
         ssim: Ssim,
         mask: Mask,
+        progress_callback=None,
     ):
         delta = FORWARD
-        if copy_from_image == 0:  # only copying one frame
+        if copy_from_image == 0:
             copy_from_image = image_counter
             copy_to_image = image_counter + 1
 
         if copy_from_image > copy_to_image:
             delta = BACKWARDS
 
-        for frame_index in self.custom_range(copy_from_image, copy_to_image):
+        total_frames = abs(copy_to_image - copy_from_image)
+        for frames_done, frame_index in enumerate(
+            self.custom_range(copy_from_image, copy_to_image), start=1
+        ):
             self.backup.create_backup_frame(frame_index + delta, image_dir, backup_dir)
-            self.copy_image(
-                ssim,
-                frame_index,
-                mask,
-                image_dir,
-                delta,
-            )
+            self.copy_image(ssim, frame_index, mask, image_dir, delta)
+
+            if progress_callback is not None and total_frames > 0:
+                progress_callback(int((frames_done * 100) / total_frames))

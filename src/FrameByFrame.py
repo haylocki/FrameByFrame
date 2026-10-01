@@ -7,12 +7,13 @@ from multiprocessing import cpu_count
 
 import numpy as np
 from PyQt6 import QtWidgets
-from PyQt6.QtCore import QCoreApplication, QEvent, QProcess, pyqtSlot
+from PyQt6.QtCore import QCoreApplication, QEvent, QProcess, QThreadPool, pyqtSlot
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtWidgets import QApplication, QSpinBox
 from PyQt6.uic.load_ui import loadUi
 
 from Copy_Images import Copy_Images
+from Copy_Images_Worker import Copy_Images_Worker
 from Dialogs import Dialogs
 from Gui_Values import Gui_Values
 from Image import Image
@@ -388,7 +389,11 @@ class Ui(QtWidgets.QMainWindow):
     def copy_to_pressed(self) -> None:
         self.copy_to_image = self.image_counter
         self.disable_buttons()
-        self.copy_images.copy(
+
+        self.copy_progress_dialog = self.dialogs.copying_frames_dialog(self)
+
+        worker = Copy_Images_Worker(
+            self.copy_images,
             self.image_counter,
             self.image_dir,
             self.backup_dir,
@@ -397,6 +402,13 @@ class Ui(QtWidgets.QMainWindow):
             self.ssim,
             self.image_mask,
         )
+        worker.signals.progress.connect(self.copy_progress_dialog.setValue)
+        worker.signals.finished.connect(self.on_copy_finished)
+        self.copy_thread_pool = getattr(self, "copy_thread_pool", QThreadPool())
+        self.copy_thread_pool.start(worker)
+
+    def on_copy_finished(self) -> None:
+        self.copy_progress_dialog.close()
         self.image_counter = self.copy_to_image
         self.copy_from_image = 0
         self.copy_to_image = 0
