@@ -1,6 +1,6 @@
 import json
-from bisect import bisect_right
 import os
+from bisect import bisect_right
 
 from Gui_Values import Gui_Values
 from Scene import Scene
