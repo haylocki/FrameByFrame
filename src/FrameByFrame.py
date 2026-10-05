@@ -35,7 +35,7 @@ class Ui(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
-        ui_file_path = f"{self.current_dir}/FrameByFrame.ui"
+        ui_file_path = os.path.join(self.current_dir, "FrameByFrame.ui")
         self.current_dir = os.path.dirname(self.current_dir)
         loadUi(ui_file_path, self)
         self.screen = QGuiApplication.primaryScreen()
@@ -471,7 +471,9 @@ class Ui(QtWidgets.QMainWindow):
         self.load_images()
 
     def enable_undo(self) -> bool:
-        backup_filename = f"{self.backup_dir}{self.image_counter:06d}_001.png"
+        backup_filename = os.path.join(
+            self.backup_dir, f"{self.image_counter:06d}_001.png"
+        )
 
         return os.path.isfile(backup_filename)
 
@@ -536,8 +538,8 @@ class Ui(QtWidgets.QMainWindow):
             self.image_counter = 1
             self.image_slider.setValue(self.image_counter)
             self.disable_buttons()
-            self.backup_dir = f"{selected_dir}/backup/"
-            self.image_dir = f"{selected_dir}/"
+            self.backup_dir = os.path.join(selected_dir, "backup")
+            self.image_dir = selected_dir
             os.makedirs(self.backup_dir, exist_ok=True)
             self.load_settings()
 

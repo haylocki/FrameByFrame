@@ -34,7 +34,7 @@ class Blur_Pixels:
 
         if y_start >= y_stop or x_start >= x_stop:
             return
-        
+
         roi = left_image[y_start:y_stop, x_start:x_stop]
         blurred_roi = cv2.GaussianBlur(roi, (BLUR_KERNEL_SIZE, BLUR_KERNEL_SIZE), 0)
 

@@ -38,7 +38,7 @@ class Mask_Copy_Operations:
         )
         ssim.set(image_counter, ssim_value)
 
-    @staticmethod 
+    @staticmethod
     def masked_copy(
         source_image: np.ndarray, destination_image: np.ndarray, mask: np.ndarray
     ) -> np.ndarray:

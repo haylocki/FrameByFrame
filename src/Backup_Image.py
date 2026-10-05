@@ -12,7 +12,7 @@ class Backup_Image:
 
     @staticmethod
     def create_backup_frame(frame_number: int, image_dir: str, backup_dir: str):
-        file_to_backup = f"{image_dir}{frame_number:06d}.png"
+        file_to_backup = os.path.join(image_dir, f"{frame_number:06d}.png")
         backup_number = 1
         while os.path.isfile(
             file_path_to_copy_to := Backup_Image.get_backup_file_path(
@@ -31,7 +31,7 @@ class Backup_Image:
         frame_number: int, backup_number: int, backup_dir: str
     ) -> str:
         filename = Backup_Image.build_backup_filename(frame_number, backup_number)
-        return f"{backup_dir}{filename}"
+        return os.path.join(backup_dir, filename)
 
     @staticmethod
     def find_last_backup(frame_number: int, backup_dir: str) -> str:
@@ -43,6 +43,8 @@ class Backup_Image:
                 current_backup_number = entry[BACKUP_NUMBER_START:BACKUP_NUMBER_END]
                 if current_backup_number.isdigit():
                     current_backup_number = int(current_backup_number)
-                    highest_backup_number = max(highest_backup_number, current_backup_number)
+                    highest_backup_number = max(
+                        highest_backup_number, current_backup_number
+                    )
 
         return Backup_Image.build_backup_filename(frame_number, highest_backup_number)

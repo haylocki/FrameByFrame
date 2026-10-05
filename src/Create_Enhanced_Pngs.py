@@ -55,7 +55,7 @@ class Enhanced_Png_Creator(QObject):
         self.total_images = total_images
         self.previous_progress = 0
         self.thread_pool.setMaxThreadCount(gui_values.threads)
-        self.enhanced_dir = f"{image_dir}enhanced/"
+        self.enhanced_dir = os.path.join(image_dir, "enhanced")
         self.enhanced_directory = Enhanced_File_Operations(self.enhanced_dir)
         self.enhanced_directory.remove(window)
         self.enhanced_directory.create()
@@ -165,11 +165,11 @@ class Enhanced_Png_Creator(QObject):
         was skipped during parallel processing. Must run strictly in order
         so cascades of consecutive identical frames resolve correctly."""
         for frame_index in range(1, self.total_images + 1):
-            current_path = f"{self.enhanced_dir}{frame_index:06d}.png"
+            current_path = os.path.join(self.enhanced_dir, f"{frame_index:06d}.png")
             if os.path.isfile(current_path):
                 continue
 
-            prev_path = f"{self.enhanced_dir}{frame_index - 1:06d}.png"
+            prev_path = os.path.join(self.enhanced_dir, f"{frame_index - 1:06d}.png")
             if self.ssim.get(frame_index - 1) == IDENTICAL and os.path.exists(
                 prev_path
             ):
@@ -190,7 +190,7 @@ class Enhanced_Png_Creator(QObject):
 
     @staticmethod
     def get_frame_dimensions(image_dir: str) -> tuple[int, int]:
-        first_frame_path = f"{image_dir}000001.png"
+        first_frame_path = os.path.join(image_dir, "000001.png")
         frame = cv2.imread(first_frame_path)
         if frame is None:
             raise ValueError(f"Could not read first frame at {first_frame_path}")

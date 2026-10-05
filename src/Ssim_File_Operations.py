@@ -7,7 +7,7 @@ class Ssim_File_Operations:
         self.ssim: list[float] = []
 
     def save(self, image_dir: str):
-        file_path = f"{image_dir}ssim_values.txt"
+        file_path = os.path.join(image_dir, "ssim_values.txt")
 
         try:
             with open(file_path, "w") as file:
@@ -17,7 +17,7 @@ class Ssim_File_Operations:
 
     def load(self, image_dir: str, total_images: int) -> bool:
         result = False
-        file_path = f"{image_dir}ssim_values.txt"
+        file_path = os.path.join(image_dir, "ssim_values.txt")
 
         if os.path.isfile(file_path):
             self.ssim.clear()

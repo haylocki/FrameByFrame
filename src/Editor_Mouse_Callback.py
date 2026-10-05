@@ -40,12 +40,7 @@ class Editor_Mouse_Callback:
                 self.prevY = y
 
             self.blur_pixels.blur_adjacent_pixels(
-                x,
-                y,
-                self.prevX,
-                self.prevY,
-                editing_image,
-                self.brush_radius
+                x, y, self.prevX, self.prevY, editing_image, self.brush_radius
             )
             self.prevX, self.prevY = x, y
 

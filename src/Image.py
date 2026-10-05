@@ -1,3 +1,5 @@
+import os
+
 import cv2
 import numpy as np
 from PyQt6.QtGui import QImage, QPixmap
@@ -16,8 +18,7 @@ class Image:
         )
 
     def load(self, image_counter: int, image_dir: str) -> None:
-        picture = cv2.imread(f"{image_dir}{image_counter:06d}.png")
-
+        picture = cv2.imread(os.path.join(image_dir, f"{image_counter:06d}.png"))
         if picture is None:
             print(
                 f"Error loading image {image_counter}: file not found or "
@@ -33,7 +34,9 @@ class Image:
 
     def save(self, image_counter: int, image_dir: str):
         try:
-            cv2.imwrite(f"{image_dir}{image_counter:06d}.png", self.picture)
+            cv2.imwrite(
+                os.path.join(image_dir, f"{image_counter:06d}.png"), self.picture
+            )
         except cv2.error as e:
             print(f"Error saving image {image_counter}: {e}")
 
@@ -110,5 +113,5 @@ class Image:
 
         qImage = QImage(
             cv2Image.data, width, height, bytes_per_line, QImage.Format.Format_BGR888
-        ) 
+        )
         return qImage

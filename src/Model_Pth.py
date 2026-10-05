@@ -31,7 +31,9 @@ class Model_Pth:
             self.required_scale = self.scale
             self.scale = 4
 
-        self.model_file_path = f"{current_dir}/src/models/{scaling}.pth"
+        self.model_file_path = os.path.join(
+            current_dir, "src", "models", f"{scaling}.pth"
+        )
 
         self.set_device(device)
 

@@ -18,14 +18,14 @@ class Dialogs:
             None, title, "", "Video Files (*.mp4 *.avi *.mkv)"
         )
         return selected_file
-    
+
     @staticmethod
     def select_directory_dialog():
         options = QFileDialog.Option.ShowDirsOnly
         selected_dir = QFileDialog.getExistingDirectory(
             None, "Select Image Directory", "", options=options
         )
-        
+
         return selected_dir
 
     @staticmethod

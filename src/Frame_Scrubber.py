@@ -20,10 +20,16 @@ class Frame_Scrubber(QSlider):
         option = QStyleOptionSlider()
         self.initStyleOption(option)
         groove_rect = style.subControlRect(
-            QStyle.ComplexControl.CC_Slider, option, QStyle.SubControl.SC_SliderGroove, self
+            QStyle.ComplexControl.CC_Slider,
+            option,
+            QStyle.SubControl.SC_SliderGroove,
+            self,
         )
         handle_rect = style.subControlRect(
-            QStyle.ComplexControl.CC_Slider, option, QStyle.SubControl.SC_SliderHandle, self
+            QStyle.ComplexControl.CC_Slider,
+            option,
+            QStyle.SubControl.SC_SliderHandle,
+            self,
         )
 
         span = max(self.maximum() - self.minimum(), 1)

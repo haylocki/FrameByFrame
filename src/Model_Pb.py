@@ -18,7 +18,9 @@ class Model_Pb:
         return image
 
     def set_scaling_model(self, scaling: str, current_dir: str, device: str = "cpu"):
-        self.model_file_path = f"{current_dir}/src/models/{scaling}.pb"
+        self.model_file_path = os.path.join(
+            current_dir, "src", "models", f"{scaling}.pb"
+        )
         self.model.readModel(self.model_file_path)
         self.model.setModel(scaling[:-2], int(scaling[-1]))
 

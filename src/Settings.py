@@ -10,7 +10,7 @@ class Settings:
         self.settings_filename = "settings.json"
 
     def load(self, gui_values: Gui_Values) -> Gui_Values:
-        file_path = f"{self.current_dir}/{self.settings_filename}"
+        file_path = os.path.join(self.current_dir, self.settings_filename)
 
         if not os.path.exists(file_path):
             return gui_values
@@ -26,7 +26,7 @@ class Settings:
 
     def save(self, gui_values: Gui_Values):
         settings_dict = gui_values.__dict__
-        file_path = f"{self.current_dir}/{self.settings_filename}"
+        file_path = os.path.join(self.current_dir, self.settings_filename)
 
         try:
             with open(file_path, "w") as file:

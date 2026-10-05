@@ -30,9 +30,6 @@ class Circular_Brush:
         actual_y = np.arange(y_start, y_stop)[:, None]
         actual_x = np.arange(x_start, x_stop)[None, :]
 
-        distance_squared = (
-            (actual_x - center_x) ** 2
-            + (actual_y - center_y) ** 2
-        )
+        distance_squared = (actual_x - center_x) ** 2 + (actual_y - center_y) ** 2
 
         return distance_squared <= radius**2

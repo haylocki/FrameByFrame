@@ -85,7 +85,7 @@ class Image_Processing_Worker(QRunnable):
 
         try:
             if not os.path.isfile(
-                f"{self.enhanced_dir}{frame_index:06d}.png"
+                os.path.join(self.enhanced_dir, f"{frame_index:06d}.png")
             ) and not (
                 self.ssim.get(frame_index - 1) == IDENTICAL and same_scene_as_previous
             ):
@@ -144,7 +144,7 @@ class Image_Processing_Worker(QRunnable):
 
     def benchmark_tile_size(self) -> None:
         assert self.scale_model is not None
-        sample_image = cv2.imread(f"{self.image_dir}000001.png")
+        sample_image = cv2.imread(os.path.join(self.image_dir, "000001.png"))
 
         if sample_image is None:
             return

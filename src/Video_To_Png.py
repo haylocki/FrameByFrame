@@ -1,3 +1,5 @@
+import os
+
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMainWindow
 
@@ -27,7 +29,7 @@ class Video_To_Png(QObject):
 
             if file_ops.check_for_png(window, image_dir):
                 for image_counter in range(1, total_images + 1):
-                    output_file = f"{image_dir}{image_counter:06d}.png"
+                    output_file = os.path.join(image_dir, f"{image_counter:06d}.png")
                     image = file_ops.read_frame(video, image_counter)
                     file_ops.write_frame(output_file, image)
                     progress_percentage = int((image_counter / total_images) * 100)

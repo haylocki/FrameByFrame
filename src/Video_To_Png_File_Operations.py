@@ -27,7 +27,7 @@ class Video_To_Png_File_Operations:
 
     @staticmethod
     def delete_ssim_values(image_dir: str):
-        file_path = f"{image_dir}ssim_values.txt"
+        file_path = os.path.join(image_dir, "ssim_values.txt")
         if os.path.exists(file_path):
             try:
                 os.remove(file_path)

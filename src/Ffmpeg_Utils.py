@@ -1,3 +1,4 @@
+import os
 import re
 
 from PyQt6.QtCore import QObject, QProcess, pyqtSignal, pyqtSlot
@@ -23,7 +24,7 @@ class Ffmpeg_Utils(QObject):
         selected_file: str,
         output_file: str,
     ):
-        enhanced_image_dir = f"{image_dir}enhanced/"
+        enhanced_image_dir = os.path.join(image_dir, "enhanced")
         self.total_images = total_images
 
         ffmpeg_command = [
@@ -31,7 +32,7 @@ class Ffmpeg_Utils(QObject):
             "-framerate",
             fps,
             "-i",
-            f"{enhanced_image_dir}%06d.png",
+            os.path.join(enhanced_image_dir, "%06d.png"),
             "-i",
             selected_file,
             "-map",
