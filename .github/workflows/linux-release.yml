@@ -57,12 +57,12 @@ jobs:
           tar -czvf FrameByFrame-Linux.tar.gz \
             FrameByFrame requirements.txt README.md LICENSE
 
-
       - name: Upload release asset
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release upload V1.0.1 dist/release/FrameByFrame-Linux.tar.gz \
-            --repo "$GITHUB_REPOSITORY"
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: V1.0.1
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: dist/release/FrameByFrame-Linux.tar.gz
+          fail_on_unmatched_files: true
 
 
