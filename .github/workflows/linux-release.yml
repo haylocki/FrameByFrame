@@ -61,6 +61,8 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: V1.0.1
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: dist/release/FrameByFrame-Linux.tar.gz
           fail_on_unmatched_files: true
+
 
