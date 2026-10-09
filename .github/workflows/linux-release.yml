@@ -3,9 +3,11 @@ name: Build Linux Release
 on:
   release:
     types: [created]
+  workflow_dispatch:
 
 permissions:
   contents: write
+
 
 jobs:
   build-linux:
