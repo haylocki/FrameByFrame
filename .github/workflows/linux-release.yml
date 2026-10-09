@@ -1,0 +1,45 @@
+name: Build Linux Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install pyinstaller
+    
+    - name: Build Linux executable
+      run: |
+        pyinstaller --onefile --icon=icon.png src/FrameByFrame.py
+        mkdir dist/release
+        cp dist/FrameByFrame dist/release/FrameByFrame
+        cp requirements.txt dist/release/
+        cp README.md dist/release/
+        cp LICENSE dist/release/
+        chmod +x dist/release/FrameByFrame
+    
+    - name: Create tarball
+      run: |
+        cd dist/release
+        tar -czvf FrameByFrame-Linux.tar.gz FrameByFrame requirements.txt README.md LICENSE
+        cd ../..
+    
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: dist/release/FrameByFrame-Linux.tar.gz
+        asset_name: FrameByFrame-Linux.tar.gz
+        asset_content_type: application/gzip
