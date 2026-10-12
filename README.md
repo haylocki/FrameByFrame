@@ -6,61 +6,24 @@ Allows you to edit a video frame by frame to remove blemishes from the video. Th
 
 ## Windows Installation
 
-**Install Python 3.11.9:**
+**Windows 10 or later is required.**
 
-We require python < 3.12 because of a compatiblity problem with lmdb
+Download and extract the FrameByFrame Windows release archive.
+Open the extracted FrameByFrame folder.
+Double-click install.bat to start the installer.
 
-Download [Python 3.11.9](https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe)
+The installer will automatically:
 
-Open the downloaded file to install python
+Install Python 3.11.9 (64-bit) if it is not already installed.
+Install the Microsoft Visual C++ Redistributable if required.
+Download and install FFmpeg locally, without requiring a separate system-wide installation.
+Create the fbfenv Python virtual environment.
+Install PyTorch with CUDA support and the other required Python packages.
+Create a Start Menu shortcut with the FrameByFrame icon.
 
-Select the "Use admin privileges when installing py.exe" option
+Important: The installation downloads several components, including the CUDA-enabled PyTorch packages. A broadband connection and several gigabytes of free disk space are recommended.
 
-Select the "Add python.exe to PATH" option
-
-Click on "Install Now"
-
-**Open Command Prompt as Administrator:**
-
-Search for "Command Prompt" in the Start Menu, right-click it, and select "Run as administrator."
-
-**Install ffmpeg:**
-
-`winget install --id Gyan.FFmpeg`
-
-Reboot the computer
-
-**Open Command Prompt as Administrator:**
-
-Search for "Command Prompt" in the Start Menu, right-click it, and select "Run as administrator."
-
-**Change directory to where you download FrameByFrame:**
-
-`cd path\to\FrameByFrame`
-
-**Create the virtual environment:**
-
-`python -m venv fbfenv`
-
-**Activate the virtual environment:**
-
-`fbfenv\Scripts\Activate.bat`
-
-**Install required python modules:**
-
-`pip install --upgrade -r requirements.txt`
-
-**Run the application:**
-
-`python ./src/FrameByFrame.py`
-
-**To run the application in the future:**
-
-Open a Command Prompt
-
-`path\to\FrameByFrame\fbfenv\Scripts\Activate.bat`
-
-`python path\to\FrameByFrame\src\FrameByFrame.py`
+Once installation has completed, launch FrameByFrame from the Windows Start Menu.
 
 ## Installing from the Linux release archive
 
