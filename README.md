@@ -57,12 +57,45 @@ Search for "Command Prompt" in the Start Menu, right-click it, and select "Run a
 **To run the application in the future:**
 
 Open a Command Prompt
- 
+
 `path\to\FrameByFrame\fbfenv\Scripts\Activate.bat`
 
 `python path\to\FrameByFrame\src\FrameByFrame.py`
 
-## Linux Install:
+## Installing from the Linux release archive
+
+The easiest way to install FrameByFrame on Linux is to use the pre-packaged source archive.
+
+1. Download FrameByFrame
+
+Go to the FrameByFrame Releases page and download FrameByFrame-Linux.tar.gz from the latest release.
+
+2. Extract the archive
+
+Extract FrameByFrame-Linux.tar.gz using your archive manager. This creates a FrameByFrame directory containing the application source and installer.
+
+3. Run the installer
+
+Open a terminal in the extracted FrameByFrame directory and run:
+
+chmod +x install.sh
+./install.sh
+
+The installer will install the required system packages, create a Python virtual environment, install the required Python modules, and add FrameByFrame to your applications menu.
+
+You may be asked for your password to install system packages. An internet connection is required to download the dependencies, including PyTorch.
+
+4. Launch FrameByFrame
+
+Once installation is complete, launch FrameByFrame from your applications menu, under Multimedia.
+
+The virtual environment and launcher are created automatically, so you do not need to activate the virtual environment or run Python commands manually.
+
+Alternative: Manual installation
+
+If you prefer to install FrameByFrame manually, follow the instructions below.
+
+## Linux Source Install:
 
 **To install on debian based systems:**
 
