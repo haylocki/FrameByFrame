@@ -95,7 +95,7 @@ Alternative: Manual installation
 
 If you prefer to install FrameByFrame manually, follow the instructions below.
 
-## Linux Source Install:
+## Manual Linux installation:
 
 **To install on debian based systems:**
 
